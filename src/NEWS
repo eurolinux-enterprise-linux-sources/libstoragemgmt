@@ -1,0 +1,397 @@
+News for libStorageMgmt
+
+1.4.0: Feb 17 2016:
+    - Add Python3 support.
+    - Add support of lmiwbem.
+    - Allow plugin test to be run concurrently.
+    - Bug fixes:
+        * Fix megaraid plugin for dell PERC.
+        * Fix local disk rotation speed query on NVMe disk.
+        * Fix lsmcli incorrect try-expect on local disk query.
+        * Fix all the gcc compile warnings.
+        * Fix the obsolete usage of AC_OUTPUT in configure.ac.
+    - Library adds:
+        * Query serial of local disk:
+            lsm_local_disk_serial_num_get()/lsm.LocalDisk.serial_num_get()
+        * Query LED status of local disk:
+            lsm_local_disk_led_status_get()/lsm.LocalDisk.led_status_get()
+        * Query link speed of local disk:
+            lsm_local_disk_link_speed_get()/lsm.LocalDisk.link_speed_get()
+
+1.3.4: Aug 2 2016:
+    - Bug fixes:
+        * https://github.com/libstorage/libstoragemgmt/pull/177
+
+1.3.3: Jul 29 2016:
+    - Bug fixes:
+        * https://bugzilla.redhat.com/show_bug.cgi?id=1346901
+        * https://bugzilla.redhat.com/show_bug.cgi?id=1346898
+        * https://bugzilla.redhat.com/show_bug.cgi?id=1360177
+        * https://github.com/libstorage/libstoragemgmt/issues/167
+        * Seg. fault on qemu simulated disk
+        * Fix make check on EL6 (python 2.6)
+        * Misc. code improvements & corrections
+        * Fix regression introduced by coverity scan correction
+
+1.3.2: May 18 2016:
+    - Bug fixes:
+        * https://github.com/libstorage/libstoragemgmt/pull/152
+        * https://github.com/libstorage/libstoragemgmt/pull/154
+
+1.3.1: May 13 2016:
+    - Bug fix for https://github.com/libstorage/libstoragemgmt/pull/150
+
+1.3.0: May 12 2016:
+    - Library adds:
+        * Change the raid card cache split (%read, %write)
+        * Retrieve/update cache information of both the card and physical disks
+          (enable/disable caching etc.)
+        * Turn on/off identify and fault LEDs
+        * Retrieve information on batteries
+        * Retrieve a physical disk RPM, link type and location string for a disk
+        * Retrieve the vpd 0x83 for directly attached disk(s)
+        * Given a vpd 0x83 return list of local disk paths
+        * Given a disk path return the vpd 0x83 value
+        * Retrieve list of local disks
+    - Bug fixes:
+        * https://github.com/libstorage/libstoragemgmt/issues/118
+        * https://bugzilla.redhat.com/show_bug.cgi?id=1323789
+        * https://github.com/libstorage/libstoragemgmt/issues/144
+
+1.2.3: Jun 24 2015:
+    - Bug fix:
+        * lsmcli bash completion: Fix syntax error.
+        * lsmcli bash completion: Fix volume-delete.
+        * lsmcli bash completion: Add missing completions.
+
+1.2.2: Jun 23 2015:
+    - Bug fixes:
+        * Fix: selinux dac_override
+        * Manpage: Update hpsa and megaraid plugin manpages.
+        * HP Smart Array Plugin: Fix pool querying on P410i.
+        * MegaRAID Plugin: Fix bug when no volume configured.
+
+1.2.1: Jun 17 2015:
+    - Bug fix:
+        * Fix 'make distcheck' error on bash-completion.
+
+1.2.0: Jun 16 2015
+    - New features:
+        * The lsmd daemon now allows plugin to run as root using configure
+          file.
+        * Targetd plugin got full access group support.
+        * The simulator plugin switched from risky pickle to sqlite3 for state
+          saving.
+        * Introduced bash auto completion support for lsmcli command.
+        * Two new plugins for hardware RAID cards:
+            * LSI MegaRAID plugin -- megaraid://
+                Dell PERC and other OEM rebanded MegaRAID cards are also
+                supported.
+            * HP SmartArray plugin -- hpsa://
+    - Library adds:
+        * New method to query RAID information of volume:
+            Python: lsm.Client.volume_raid_info().
+            C: lsm_volume_raid_info().
+        * New method to query pool membership:
+            Python: lsm.Client.pool_member_info().
+            C: lsm_pool_member_info().
+        * New disk status constant to indicate certain disk could be used as
+          pool disk or dedicate spare disk.
+            Python: DISK.STATUS_FREE.
+            C: LSM_DISK_STATUS_FREE.
+        * New method to create RAID volume on hardware RAID cards:
+            Python: lsm.Client.volume_raid_create_cap_get().
+                    lsm.Client.volume_raid_create().
+            C: lsm_volume_raid_create_cap_get().
+               lsm_volume_raid_create().
+        * New C plugin register interface for version 1.2 new methods:
+            lsm_register_plugin_v1_2()
+    - Bug fixes and miscellaneous fixes:
+        * lsmd: Fix a possible infinity loop on plugin search.
+        * Fix memory leak in C unit test.
+        * Library: Fix incorrect Volume.vpd83 definition
+        * SMI-S plugin: Fix SMI-S plugin spare disk support.
+        * SMI-S plugin: Fix target_ports() for HP 3PAR and EMC VMAX.
+        * SMI-S plugin: Fix the incorrect profile_check().
+        * Fix C library compile warning.
+        * Fix C library potential memory leak in handle_volume_raid_create().
+        * ONTAP, MegaRAID, SMI-S Plugins: Enforce the definition of Pool.status.
+        * Change license statement by replacing address to URL.
+        * lsmd: add error catch for signal.
+        * lsmcli: fix _get_item error message.
+        * C Library: Fix message loop
+        * C Library: Clean up code for DRY(don't repeat yourself).
+        * SMI-S Plugin: Collect xml during exception.
+        * C Library: Remove ambiguity between wrong type or OOM
+        * C code clean up to use K&R code style.
+        * Add Charles Rose to AUTHORS.
+
+1.1.1: Dec 4 2014
+    - Library adds:
+
+      API Constants for new pool element types and plugin changes to support it
+      * C constants:
+         LSM_POOL_ELEMENT_TYPE_VOLUME_FULL, LSM_POOL_ELEMENT_TYPE_VOLUME_THIN
+      * Py constants:
+         Pool.ELEMENT_TYPE_VOLUME_FULL, Poll.ELEMENT_TYPE_THIN
+
+      lsmcli:
+      * lt - Alias for 'list --type target_ports'
+      * Removed --init for volume-mask, it was broken for targetd (the only
+        user) and instead of fixing we are going to improve targetd to support
+        access groups in the next release
+
+    - Numerous code improvements, including a big SMI-S plugin refactor,
+      source code documentation corrections
+
+    - Bug fix: Use correct default values for anonymous uid/gid in lsmcli
+    - Bug fix: simc simulator not working for allowable NULL parameters for:
+      *  fs_child_dependency
+      *  fs_child_dependency_rm
+      *  fs_snapshot_restore
+    - Bug fix: lsm_restd memory leak corrections
+    - Bug fix: NetApp plugin, correctly set export path when caller specifies
+      default in API
+    - Bug fix: Add file locking to sim plugin to prevent concurrent modification
+    - Bug fix: Consistently report common error conditions for NO_STATE_CHANGE,
+      EXISTS_INITIATOR for all plugins
+    - Bug fix: Number of bugs addressed in SMI-S plugin including:
+      * EMC: Correct error path when replicating a volume with a duplicate
+        volume name
+      * HDS: Correctly create thinly provisioned volume on thinly provisioned
+        pool
+
+1.0.0: Sep 7 2014
+    - Release version 1
+    - Numerous constants re-naming & removing
+    - Removed the pool create/delete until things work better,
+      esp. WRT SMI-S
+    - Added checks for initiator ID verification
+    - Added checks for vpd 0x83 verification
+    - Simplified error logging (removed domain & level)
+    - Re-named functions for online,offline -> enable,disable
+    - Always use objects instead of object ID in function
+      params
+    - Removed individual files from fs snapshot creation
+    - Add unsupported actions for pools
+    - lsm_capability_set_n uses a -1 to terminate list
+    - Volume status removed, replaced with admin state
+    - Removed ibmiv7k plugin
+    - Explicitly specify python2
+    - Error path consistency changes (same error for same condition
+      across plug-ins)
+    - Numerous bug fixes
+
+0.1.0: Jul 3 2014
+    - Release candidate for a 1.0.0 release
+    - Optional data removed
+    - Initiator only functions removed
+    - Pool create from from volumes removed
+    - Code directory structure updated
+    - Target port listing added
+
+0.0.24: Jan 30 2014
+    - Command line interface (CLI) re-factored and improved to be easier to use
+      and more consistent, man pages have been updated
+    - Command line output now has '-s, --script' for an additional way to output
+      information for consumption in scripts
+    - Command line option '-o' for retrieving optional/extended data for disks &
+      pools
+    - Pool creation/deleting in CLI & python API
+    - Numerous small bug fixes
+    - C API, added ability to list disks, list plugins and retrieve optional
+      data for disks
+    - SSL for SMI-S is more stringent on certificate checking for newer
+      distributions, new URI option "no_ssl_verify=yes" to disable
+
+0.0.23: Nov 27 2013
+    - Addition of listing disks implemented for SMI-S and Ontap plugins
+      (new, not in C library yet)
+    - Add the ability to list currently installed and usable plug-ins
+    - Verify return types are correct in python client calls
+    - Added the ability to retrieve optional data (new, not in C library yet)
+    - Visibility reductions for python code (somethings were public when should be
+      private
+    - Add calls to create/delete pools (new, not in C library yet)
+    - Add missing initiator type for SAS
+    - Improved vpd83 retrieval for SMI-S
+    - Performance improvements for SMI-S plug-in
+    - Numerous small bug fixes
+    - Nstor plugin, additional testing and bug fixes
+    - lsmd, added call to setgroups and enable full relo and PIE (ASLR) for
+      security improvements
+    - simulator state is now versioned
+    - SCSI Unit Attention uevent handling
+
+0.0.22: Aug 12 2013
+    - Numerous code improvments/fixes
+    - BZ 968384
+    - BZ 990577
+
+0.0.21: Jul 16 2013
+    - IEC binary size handling
+    - Functionality improvements for IBM V7K array
+    - Workaround for python bug on F19
+    - Bugfix (BZ 968384)
+    - Package plug-ins as separately in rpm packages
+
+0.0.20: May 24 2013
+    - Python library files now in separate rpm
+    - Additional debug for plug-ins when exceptions occur
+    - iSCSI CHAP support modified to handle both inbound and outbound authentication
+    - VOLUME_THIN Added as new capability flag
+    - IBM V7000 storage array support
+    - NFS export support for targetd
+    - EXPORT_CUSTOM_PATH added capability flag
+
+0.0.19: Apr 20 2013
+    - Improved E-Series array support
+    - Ontap plug-in: improve performance with many Volumes
+    - lsmcli: Number of corrections on handling unit specifiers
+    - lsmcli: Correct stack track when stdout is written to while closed
+    - Fix build to work with automake >= 1.12
+
+0.0.18: Mar 7 2013
+    - lsmd: Re-written in C
+    - Simplify fs_delete
+    - Corrections for C client against Python plugin
+    - Testing: Run cross language unit test too
+    - Initial FS support for targetd plugin
+    - Fix multi-arch python issues which prevent py and compiled py files
+      from being identical on different arches
+
+0.0.17: Jan 31 2013
+    - Inconsistency corrections between C and Python API
+    - Source code documentation updates
+    - NexentaStor plug-in has been added
+
+0.0.16: Jan 1 2013
+    - lsmcli: Add confirmation prompt for data loss operations
+    - lsmcli: Display enumerated values as text
+    - lsmcli: Exit with 7 for --job-status when not complete
+    - Fixed URI example to reference an existing plug-in
+    - lsmcli: Retrieve plug-in desc. and version (lsmcli --plugin-info)
+    - simc: Implement CHAP auth function (no-op)
+    - lsmcli: Change check for determining if lsmd is running
+    - Disable mirroring for SMI-S as it needs some re-work
+
+0.0.15: Nov 20 2012
+    - Pool parameter is optional when replicating a volume
+    - Code improvements(Memory leak fix, lsmcli checks if lsmd is running)
+    - Source code documentation updates
+    - Ability to override simulator data storage location
+    - make check target added to run unit tests
+
+0.0.14: Oct 19 2012
+    - test/cmdline.py added to automatically test what an array supports
+    - Bug fixes (local plug-in execution, smi-s delete clone, code warnings)
+    - targetd: (uri syntax consistency change, initialization code change)
+    - Pool id added to volume information
+    - lsmcli: Added --replicate-volume-range-block-size <system id> to retrieve
+      replicated block size
+
+0.0.13: Sep 28 2012
+    - targetD Feature adds/fixes for initiators, init_granted_to_volume,
+      volumes_accessible_by_init, initiator_grant, initiator_revoke
+    - SMI-S added compatibility with CIM_StorageConfigurationService
+    - SMI-S bug fixes/changes to support XIV arrays (Basic functionality verified)
+    - SMI-S Proxy layer added to allow different internal implementations of smi-s
+      client
+    - Added missing version information for C plug-in API
+    - lsmcli URI can be stored in file .lsmcli in users home directory
+
+0.0.12: Sep 7 2012
+    - SMI-S plug-in enhancements (Detach before delete, bug fixes for eSeries)
+    - Added version specifier for non-opaque structs in plug-in callback interface
+    - Documentation updates (doxygen, man pages)
+    - Ontap plug-in: support timeout values
+    - lsmcli, return back async. values other than volumes when using --job-status
+
+0.0.11: Aug 13 2012
+    - SMI-S fixes and improvements (WaitForCopyState, _get_class_instance)
+    - Methods for arrays that don't support access groups to grant access
+      for luns to initiators etc.
+    - ISCSI Chap authentication
+    - System level status field for overall array status
+    - targetd updates for mapping targets to initiators
+    - Simulator updates (python & C)
+    - Removed tog-pegasus dependency (SMI-S is python plug-in)
+    - Removed lsmVolumeStatus as it was implemented and redundant
+    - initscript, check for /var/run and create if missing
+
+0.0.10: July 20 2012
+    - Simulator plug-in written in C, simc_lsmplugin is available
+    - Numerous updates and re-name for plug-in targetd_lsmplugin
+    - targetd_lsmplugin included in release
+    - Memory leak fixes and improved unit tests
+    - Initial capability query support, implemented for all plug-ins
+    - Flags variable added to API calls, (Warning: C API/ABI breakage, python
+      unaffected)
+    - Bug fixes for NetApp ontap plug-in
+    - SMI-S bug fixes (initiator listing and replication, mode and sync types)
+    - Added ability to specify mirroring async or sync for replication
+    - Added version header file to allow client version header checks
+
+0.0.9: June 12 2012
+    - Initial checkin of lio plug-in
+    - System filtering via URI (smispy)
+    - Error code mapping (ontap)
+    - Fixed build so same build tarball is used for all binaries
+
+0.0.8: June 4 2012
+    - Make building of SMI-S CPP plugin optional
+    - Add pkg-config file
+    - SMIS: Fix exception while retrieving Volumes
+    - SMIS: Fix exception while retrieving Volumes
+    - lsm: Add package imports
+    - Make Smis class available in lsm python package
+    - Add option to disable building C unit test
+    - Make simulator classes available in lsm python package
+    - Make ontap class available in lsm python package
+    - Changes to support building on Fedora 17 (v2)
+    - Spec. file updates from feedback from T. Callaway (spot)
+    - F17 linker symbol visibility correction
+    - Remove unneeded build dependencies and cleaned up some warnings
+    - C Updates, client C library feature parity with python
+
+0.0.7: May 11 2012
+    - Bug fix for smi-s constants
+    - Display formatting improvements
+    - Added header option for lsmcli
+    - Improved version handling for builds
+    - Made terminology consistent
+    - Ability to list visibility for access groups and volumes
+    - Simulator plug-in fully supports all block operations
+    - Added support for multiple systems with a single plug-in instance
+
+0.0.6: Apr 20 2012
+    - Documentation improvements (man & source code)
+    - Support for access groups
+    - Unified spec files Fedora/RHEL
+    - Package version auto generate
+    - Rpm target added to make
+    - Bug fix for missing optional property on volume retrieval (smispy plug-in)
+
+0.0.5: Apr 6 2012
+    - Spec file clean-up improvements
+    - Async. operation added to lsmcli and ability to check on job status
+    - Sub volume replication support
+    - Ability to check for child dependencies on VOLUMES, FS and files
+    - SMI-S Bug fixes and improvements
+
+0.0.4: Mar 26 2012
+    - Restore from snapshot
+    - Job identifiers string instead of integer
+    - Updated license address
+
+0.0.3: Mar 19 2012
+    - Updated to support better packaging
+    - Fixes for NFS export handling
+    - Simulator persistent state
+
+0.0.2: Mar 11 2012
+    - Native plugin for NetApp
+
+0.0.1alpha: Feb 3 2012
+    - First release in package form
+    - Basic operation utilizing SMI-S providers.

@@ -1,0 +1,228 @@
+From f6122f1bbfa6e79f3e014a4ba65ffef7e1c113c1 Mon Sep 17 00:00:00 2001
+From: Gris Ge <fge@redhat.com>
+Date: Thu, 30 Mar 2017 21:03:26 +0800
+Subject: [PATCH] ONTAP plugin: SSL fix.
+
+Issue:
+    lsmcli  -u "ontap+ssl://root@na3170b.lab.bos.redhat.com" ls
+    NETWORK_ERROR(142): <urlopen error [SSL: UNSUPPORTED_PROTOCOL]
+    unsupported protocol
+
+Root cause:
+    Some OS are removing openssl the support of SSLv2 and SSLv3.
+
+Fix:
+    * When ONTAP filer is using SSLv2 or SSLv3, raise NO_SUPPORT error
+      and suggest user to enable TLS.
+    * New URI parameter 'ssl_verify=yes' to enable full SSL
+      verification, by default, we still ignore hostname check and
+      certification check.
+    * Updated manpage with guide to enable TLS on ONTAP filer and
+      explanation of new URI parameter 'ssl_verify=yes'.
+    * Use uri_parse() from lsm instead of urlparse().
+
+Signed-off-by: Gris Ge <fge@redhat.com>
+---
+ doc/man/ontap_lsmplugin.1.in | 11 +++++++++--
+ plugin/ontap/na.py           | 44 +++++++++++++++++++++++++++++++++-----------
+ plugin/ontap/ontap.py        | 21 +++++++++++----------
+ 3 files changed, 53 insertions(+), 23 deletions(-)
+
+diff --git a/doc/man/ontap_lsmplugin.1.in b/doc/man/ontap_lsmplugin.1.in
+index ef0cd12..3d6cc70 100644
+--- a/doc/man/ontap_lsmplugin.1.in
++++ b/doc/man/ontap_lsmplugin.1.in
+@@ -12,9 +12,10 @@ This plugin requires NetApp ONTAP storage array to enable these options:
+     \fBoptions httpd.enable on\fR
+     \fBoptions httpd.admin.enable on\fR
+ 
+-This options is required for HTTPS connection:
++These options are required for HTTPS connection:
+ 
+     \fBoptions httpd.admin.ssl.enable on\fR
++    \fBoptions tls.enable on\fR
+ 
+ .SH URI
+ To use this plugin, users should set their URI to this format:
+@@ -40,7 +41,13 @@ The \fBontap_filer_ip\fR is the NetApp ONTAP filer IP address or DNS name.
+ .TP
+ \fBURI parameters\fR
+ 
+-No additional URI parameters are supported by this plugin.
++This URI parameter is supported by this plugin:
++
++.RS 7
++.TP
++\fBssl_verify=yes\fR
++By default, SSL connection does not verify hostname and certification.
++If this URI parameter is defined, all SSL verifications will be performed.
+ 
+ .SH Supported Hardware
+ NetApp ONTAP 8.x is supported.
+diff --git a/plugin/ontap/na.py b/plugin/ontap/na.py
+index a16e884..26c0ff6 100644
+--- a/plugin/ontap/na.py
++++ b/plugin/ontap/na.py
+@@ -20,10 +20,9 @@
+ from xml.etree import ElementTree
+ import time
+ from binascii import hexlify
+-from ssl import SSLError
++import ssl
+ from lsm.external.xmltodict import convert_xml_to_dict
+-from lsm import (ErrorNumber)
+-
++from lsm import (LsmError, ErrorNumber)
+ 
+ if six.PY3:
+     long = int
+@@ -33,6 +32,7 @@
+                                 urlopen,
+                                 HTTPPasswordMgrWithDefaultRealm,
+                                 HTTPBasicAuthHandler,
++                                HTTPSHandler,
+                                 build_opener,
+                                 install_opener)
+     from urllib.error import (URLError, HTTPError)
+@@ -42,6 +42,7 @@
+                          urlopen,
+                          HTTPPasswordMgrWithDefaultRealm,
+                          HTTPBasicAuthHandler,
++                         HTTPSHandler,
+                          build_opener,
+                          install_opener,
+                          URLError,
+@@ -79,13 +80,13 @@ def param_value(val):
+ 
+ 
+ def netapp_filer(host, username, password, timeout, command, parameters=None,
+-                 ssl=False):
++                 use_ssl=False, ssl_verify=False):
+     """
+     Issue a command to the NetApp filer.
+-    Note: Change to default ssl on before we ship a release version.
++    Note: Change to default use_ssl on before we ship a release version.
+     """
+     proto = 'http'
+-    if ssl:
++    if use_ssl:
+         proto = 'https'
+ 
+     url = "%s://%s/servlets/netapp.servlets.admin.XMLrequest_filer" % \
+@@ -98,7 +99,15 @@ def netapp_filer(host, username, password, timeout, command, parameters=None,
+     password_manager.add_password(None, url, username, password)
+     auth_manager = HTTPBasicAuthHandler(password_manager)
+ 
+-    opener = build_opener(auth_manager)
++    if use_ssl:
++        ssl._DEFAULT_CIPHERS += ':RC4-SHA'
++        ssl_ctx = ssl.create_default_context()
++        if ssl_verify == False:
++            ssl_ctx.check_hostname = False
++            ssl_ctx.verify_mode = ssl.CERT_NONE
++        opener = build_opener(HTTPSHandler(context=ssl_ctx), auth_manager)
++    else:
++        opener = build_opener(auth_manager)
+     install_opener(opener)
+ 
+     # build the command and the arguments for it
+@@ -127,13 +136,23 @@ def netapp_filer(host, username, password, timeout, command, parameters=None,
+     except HTTPError:
+         raise
+     except URLError as ue:
++        err_msg = str(ue)
+         if isinstance(ue.reason, socket.timeout):
+             raise FilerError(Filer.ETIMEOUT, "Connection timeout")
++        elif "UNSUPPORTED_PROTOCOL" in err_msg or \
++           "EOF occurred in violation of protocol" in err_msg :
++            raise LsmError(ErrorNumber.NO_SUPPORT,
++                           "ONTAP SSL version is not supported, "
++                           "please enable TLS on ONTAP filer, "
++                           "check 'man 1 ontap_lsmplugin'")
++        elif "CERTIFICATE_VERIFY_FAILED" in err_msg:
++            raise LsmError(ErrorNumber.NETWORK_CONNREFUSED,
++                           "SSL certification verification failed")
+         else:
+             raise
+     except socket.timeout:
+         raise FilerError(Filer.ETIMEOUT, "Connection timeout")
+-    except SSLError as sse:
++    except ssl.SSLError as sse:
+         # The ssl library doesn't give a good way to find specific reason.
+         # We are doing a string contains which is not ideal, but other than
+         # throwing a generic error in this case there isn't much we can do
+@@ -262,7 +281,8 @@ class Filer(object):
+     def _invoke(self, command, parameters=None):
+ 
+         rc = netapp_filer(self.host, self.username, self.password,
+-                          self.timeout, command, parameters, self.ssl)
++                          self.timeout, command, parameters, self.use_ssl,
++                          self.ssl_verify)
+ 
+         t = rc['netapp']['results']['attrib']
+ 
+@@ -271,12 +291,14 @@ def _invoke(self, command, parameters=None):
+ 
+         return rc['netapp']['results']
+ 
+-    def __init__(self, host, username, password, timeout, ssl=True):
++    def __init__(self, host, username, password, timeout, use_ssl=True,
++                 ssl_verify=False):
+         self.host = host
+         self.username = username
+         self.password = password
+         self.timeout = timeout
+-        self.ssl = ssl
++        self.use_ssl = use_ssl
++        self.ssl_verify = ssl_verify
+ 
+     def system_info(self):
+         rc = self._invoke('system-get-info')
+diff --git a/plugin/ontap/ontap.py b/plugin/ontap/ontap.py
+index 7fd5dc3..186a57a 100644
+--- a/plugin/ontap/ontap.py
++++ b/plugin/ontap/ontap.py
+@@ -22,15 +22,10 @@
+                  AccessGroup, System, Capabilities, Disk, Pool,
+                  IStorageAreaNetwork, INfs, LsmError, ErrorNumber, JobStatus,
+                  md5, VERSION, common_urllib2_error_handler,
+-                 search_property, TargetPort, int_div)
++                 search_property, TargetPort, int_div, uri_parse)
+ 
+ import lsm.plugin.ontap.na as na
+ 
+-try:
+-    from urllib.parse import urlparse
+-except ImportError:
+-    from urlparse import urlparse
+-
+ # Maps na to lsm, this is expected to expand over time.
+ e_map = {
+     na.Filer.ENOSPC: ErrorNumber.NOT_ENOUGH_SPACE,
+@@ -135,13 +130,19 @@ def __init__(self):
+     @handle_ontap_errors
+     def plugin_register(self, uri, password, timeout, flags=0):
+         ssl = False
+-        u = urlparse(uri)
++        u = uri_parse(uri)
+ 
+-        if u.scheme.lower() == 'ontap+ssl':
++        if u['scheme'].lower() == 'ontap+ssl':
+             ssl = True
++        if 'parameters' in u and 'ssl_verify' in u['parameters'] and \
++           u['parameters']['ssl_verify'] == 'yes':
++            ssl_verify = True
++        else:
++            ssl_verify = False
+ 
+-        self.f = na.Filer(u.hostname, u.username, password,
+-                          int_div(timeout, Ontap.TMO_CONV), ssl)
++        self.f = na.Filer(u['host'], u['username'], password,
++                          int_div(timeout, Ontap.TMO_CONV), ssl,
++                          ssl_verify)
+         # Smoke test
+         i = self.f.system_info()
+         # TODO Get real filer status
+-- 
+2.12.1
+
