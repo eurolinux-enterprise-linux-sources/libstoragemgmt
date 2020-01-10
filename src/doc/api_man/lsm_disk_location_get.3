@@ -1,0 +1,21 @@
+.TH "lsm_disk_location_get" 3 "lsm_disk_location_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_location_get \- Retrieves the location for the disk.
+.SH SYNOPSIS
+.B "const char *" lsm_disk_location_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve location for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieve the disk location.
+.SH "NOTE"
+Address returned is valid until lsm_disk gets freed, copy return
+value if you need longer scope. Do not free returned string.
+.SH "CAPABILITY"
+LSM_CAP_DISK_LOCATION
+.SH "RETURN"
+string. NULL if argument 'd' is NULL or not a valid lsm_disk pointer
+or not supported.

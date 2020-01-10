@@ -1,0 +1,32 @@
+.TH "lsm_system_mode_get" 3 "lsm_system_mode_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_system_mode_get \- Retrieves system mode.
+.SH SYNOPSIS
+.B "lsm_system_mode_type" lsm_system_mode_get
+.BI "(lsm_system *" s ");"
+.SH ARGUMENTS
+.IP "s" 12
+System to retrieve system mode for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves system mode, currently only supports retrieving hardware RAID
+cards system mode.
+.SH "CAPABILITY"
+LSM_CAP_SYS_MODE_GET
+.SH "RETURN"
+lsm_system_mode_type. Possible values are:
+    * LSM_SYSTEM_MODE_UNKNOWN
+        The value when invalid argument or bug.
+    * LSM_SYSTEM_MODE_NO_SUPPORT
+        The value when requested method is not supported.
+    * LSM_SYSTEM_MODE_HARDWARE_RAID
+        The storage system is a hardware RAID card(like HP SmartArray
+        and LSI MegaRAID) and could expose the logical volume(aka,
+        RAIDed virtual disk) to OS while hardware RAID card is handling
+        the RAID algorithm. In this mode, storage system cannot expose
+        physical disk directly to OS.
+    * LSM_SYSTEM_MODE_HBA
+        The physical disks can be exposed to OS directly without any
+        configurations. SCSI enclosure service might be exposed to OS
+        also.

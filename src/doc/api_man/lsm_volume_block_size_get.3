@@ -1,0 +1,15 @@
+.TH "lsm_volume_block_size_get" 3 "lsm_volume_block_size_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_block_size_get \- Retrieves the block size for the volume.
+.SH SYNOPSIS
+.B "uint64_t" lsm_volume_block_size_get
+.BI "(lsm_volume *" v ");"
+.SH ARGUMENTS
+.IP "v" 12
+Volume to retrieve block size for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the block size in bytes for the volume.
+.SH "RETURN"
+uint64_t. 0 if argument 'v' is NULL or not a valid lsm_volume pointer.

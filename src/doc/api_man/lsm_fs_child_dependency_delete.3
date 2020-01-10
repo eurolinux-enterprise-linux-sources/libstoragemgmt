@@ -1,0 +1,45 @@
+.TH "lsm_fs_child_dependency_delete" 3 "lsm_fs_child_dependency_delete" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_child_dependency_delete \- Delete all child dependencies of specified file system.
+.SH SYNOPSIS
+.B "int" lsm_fs_child_dependency_delete
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" fs ","
+.BI "lsm_string_list *" files ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "fs" 12
+Point of lsm_fs to remove dependencies for.
+.IP "files" 12
+Pointer of lsm_string_list. Only work on specific files if defined.
+If NULL, just work on all files in this file system.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous
+action on this, a job will be created and could be tracked via
+\fBlsm_job_status_get\fP.
+NULL if storage system does not support asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Deletes child dependencies by duplicating the required storage to
+remove.
+.SH "NOTE"
+This could take a long time to complete based on dependencies.
+.SH "CAPABILITY"
+LSM_CAP_FS_CHILD_DEPENDENCY_RM
+LSM_CAP_FS_CHILD_DEPENDENCY_RM_SPECIFIC_FILES
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_NOT_FOUND_FS
+        When file system not found.
+    * LSM_ERR_NO_STATE_CHANGE
+        When file system has no child dependency.

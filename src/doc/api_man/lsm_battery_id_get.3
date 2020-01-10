@@ -1,0 +1,18 @@
+.TH "lsm_battery_id_get" 3 "lsm_battery_id_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_battery_id_get \- Retrieves the ID for the battery.
+.SH SYNOPSIS
+.B "const char  *" lsm_battery_id_get
+.BI "(lsm_battery *" b ");"
+.SH ARGUMENTS
+.IP "b" 12
+Battery to retrieve ID for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves the ID for the battery.
+.SH "NOTE"
+Address returned is valid until lsm_battery gets freed, copy
+return value if you need longer scope. Do not free returned string.
+.SH "RETURN"
+string. NULL if argument 'b' is NULL or not a valid lsm_battery pointer.

@@ -1,4 +1,5 @@
 # Copyright (C) 2012-2016 Red Hat, Inc.
+# (C) Copyright 2017 Hewlett Packard Enterprise Development LP
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
@@ -192,7 +193,9 @@ def _add_common_options(arg_parser, is_child=False):
 
     arg_parser.add_argument(
         '-s', '--script', action="store_true", dest="%sscript" % prefix,
-        default=False, help='Displaying data in script friendly way.')
+        default=False,
+        help='Displaying data in script friendly way with '
+             'additional information(if exists)')
 
     if is_child:
         default_dict = dict()
@@ -433,14 +436,15 @@ cmds = (
 
     dict(
         name='volume-replicate-range',
-        help='Replicates a portion of a volume',
+        help='Replicates a portion of a volume to existing volume',
         args=[
             dict(name="--src-vol", metavar='<SRC_VOL_ID>',
                  help='Source volume id'),
             dict(name="--dst-vol", metavar='<DST_VOL_ID>',
                  help='Destination volume id'),
-            dict(name="--rep-type", metavar='<REP_TYPE>', help=replicate_help,
-                 choices=replicate_types),
+            dict(name="--rep-type", metavar='<REP_TYPE>',
+                 help="Replication type: CLONE, COPY",
+                 choices=["CLONE", "COPY"]),
             dict(name="--src-start", metavar='<SRC_START_BLK>',
                  help='Source volume start block number.\n'
                       'This is repeatable argument.',
@@ -474,7 +478,7 @@ cmds = (
 
     dict(
         name='volume-dependants-rm',
-        help='Removes dependencies',
+        help='Removes volume dependencies',
         args=[
             dict(vol_id_opt),
         ],
@@ -688,11 +692,13 @@ cmds = (
                  default=[]),
             dict(name="--ro-host", metavar='<RO_HOST>',
                  help="The host/IP has readonly access.\n"
-                      "This is repeatable argument.",
+                      "This is repeatable argument.\n"
+                      "At least one '--ro-host' or '--rw-host' is required.",
                  action='append', default=[]),
             dict(name="--rw-host", metavar='<RW_HOST>',
                  help="The host/IP has readwrite access.\n"
-                      "This is repeatable argument.",
+                      "This is repeatable argument.\n"
+                      "At least one '--ro-host' or '--rw-host' is required.",
                  action='append', default=[]),
         ],
     ),
@@ -1160,6 +1166,9 @@ class CmdLine(object):
                                "NFS Export listing" % search_key)
             self.display_data(self.c.exports(search_key, search_value))
         elif args.type == 'NFS_CLIENT_AUTH':
+            if search_key:
+                raise ArgError("NFS client authentication type listing with "
+                               "search is not supported")
             self.display_nfs_client_authentication()
         elif args.type == 'ACCESS_GROUPS':
             if search_key == 'access_group_id':
@@ -1201,6 +1210,8 @@ class CmdLine(object):
             self.display_data(
                 self.c.target_ports(search_key, search_value))
         elif args.type == 'PLUGINS':
+            if search_key:
+                raise ArgError("Plugins listing with search is not supported")
             self.display_available_plugins()
         elif args.type == 'BATTERIES':
             if search_key and \
@@ -1401,6 +1412,9 @@ class CmdLine(object):
         # Get snapshot
         fs = _get_item(self.c.fs(), args.fs, "File System")
         ss = _get_item(self.c.fs_snapshots(fs), args.snap, "Snapshot")
+        files = self.args.file
+        if len(files) == 0:
+            files = None
 
         flag_all_files = True
 
@@ -1415,7 +1429,7 @@ class CmdLine(object):
             self._wait_for_it(
                 'fs-snap-restore',
                 self.c.fs_snapshot_restore(
-                    fs, ss, self.args.file, self.args.fileas, flag_all_files),
+                    fs, ss, files, self.args.fileas, flag_all_files),
                 None)
 
     # Deletes a volume
@@ -1655,7 +1669,10 @@ class CmdLine(object):
 
     def system_read_cache_pct_update(self, args):
         lsm_system = _get_item(self.c.systems(), args.sys, "System")
-        read_pct = int(args.read_pct)
+        try:
+            read_pct = int(args.read_pct)
+        except ValueError as ve:
+            raise LsmError(ErrorNumber.INVALID_ARGUMENT, str(ve))
 
         self.c.system_read_cache_pct_update(lsm_system, read_pct)
         lsm_system = _get_item(self.c.systems(), args.sys, "System")
@@ -1801,6 +1818,7 @@ class CmdLine(object):
             "serial_num": LocalDisk.serial_num_get,
             "led_status": LocalDisk.led_status_get,
             "link_speed": LocalDisk.link_speed_get,
+            "health_status": LocalDisk.health_status_get,
         }
         for disk_path in LocalDisk.list():
             info_dict = {
@@ -1810,13 +1828,16 @@ class CmdLine(object):
                 "serial_num": "",
                 "led_status": Disk.LED_STATUS_UNKNOWN,
                 "link_speed": Disk.LINK_SPEED_UNKNOWN,
+                "health_status": Disk.HEALTH_STATUS_UNKNOWN,
             }
             for key in info_dict.keys():
                 try:
                     info_dict[key] = func_dict[key](disk_path)
                 except LsmError as lsm_err:
                     if lsm_err.code != ErrorNumber.NO_SUPPORT:
-                        raise
+                        sys.stderr.write("WARN: %s('%s'): %d %s\n" %
+                                         (func_dict[key].__name__, disk_path,
+                                          lsm_err.code, lsm_err.msg))
 
             local_disks.append(
                 LocalDiskInfo(disk_path,
@@ -1825,7 +1846,8 @@ class CmdLine(object):
                               info_dict["link_type"],
                               info_dict["serial_num"],
                               info_dict["led_status"],
-                              info_dict["link_speed"]))
+                              info_dict["link_speed"],
+                              info_dict["health_status"]))
 
         self.display_data(local_disks)
 

@@ -1,0 +1,15 @@
+.TH "lsm_disk_number_of_blocks_get" 3 "lsm_disk_number_of_blocks_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_number_of_blocks_get \- Retrieves the block count for the disk.
+.SH SYNOPSIS
+.B "uint64_t" lsm_disk_number_of_blocks_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve block count for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the block count for the disk.
+.SH "RETURN"
+uint64_t. 0 if argument 'd' is NULL or not a valid lsm_disk pointer.

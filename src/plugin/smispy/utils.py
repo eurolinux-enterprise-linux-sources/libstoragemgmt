@@ -17,7 +17,16 @@
 import traceback
 import json
 from lsm import (LsmError, ErrorNumber, error)
-from lsm.plugin.smispy.WBEM import wbem, Error, AuthError
+import pywbem
+try:
+    from pywbem import AuthError
+except ImportError:
+    from pywbem.cim_http import AuthError
+
+try:
+    from pywbem import Error
+except ImportError:
+    from pywbem.cim_http import Error
 
 
 def merge_list(list_a, list_b):
@@ -30,7 +39,7 @@ def handle_cim_errors(method):
             return method(*args, **kwargs)
         except LsmError:
             raise
-        except wbem.CIMError as ce:
+        except pywbem.CIMError as ce:
             error_code = ce.args[0]
             desc = ce.args[1]
 
@@ -96,4 +105,4 @@ def path_str_to_cim_path(path_str):
         path_str: String to convert into a CIMInstanceName
     """
     path_dict = json.loads(path_str)
-    return wbem.CIMInstanceName(**path_dict)
+    return pywbem.CIMInstanceName(**path_dict)

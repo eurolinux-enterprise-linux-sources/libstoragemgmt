@@ -1,0 +1,20 @@
+.TH "lsm_capability_record_free" 3 "lsm_capability_record_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_capability_record_free \- Free the lsm_storage_capabilities memory.
+.SH SYNOPSIS
+.B "int" lsm_capability_record_free
+.BI "(lsm_storage_capabilities *" cap ");"
+.SH ARGUMENTS
+.IP "cap" 12
+Pointer of lsm_storage_capabilities to release.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Frees the memory resources for a lsm_storage_capabilities.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid
+        lsm_storage_capabilities pointer.

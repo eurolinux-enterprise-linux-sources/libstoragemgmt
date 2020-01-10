@@ -1,0 +1,36 @@
+.TH "lsm_local_disk_serial_num_get" 3 "lsm_local_disk_serial_num_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_serial_num_get \- Query serial number.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_serial_num_get
+.BI "(const char *" disk_path ","
+.BI "char **" serial_num ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_path" 12
+String. The path of disk path, example "/dev/sdb".
+.IP "serial_num" 12
+Output pointer of SCSI VPD80 serial number.
+NULL when error. Memory should be freed by \fBfree\fP.
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be
+retrieved via \fBlsm_error_message_get\fP. Memory should be
+freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.4
+.SH "DESCRIPTION"
+Query the serial number of specified disk path.
+For SCSI/SAS/SATA/ATA disks, it will be extracted from SCSI VPD 0x80
+page.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_NO_MEMORY
+        When no memory.
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.
+    * LSM_ERR_NOT_FOUND_DISK
+        When provided disk path not found.

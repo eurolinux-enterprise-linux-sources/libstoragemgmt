@@ -1,0 +1,50 @@
+.TH "lsm_volume_delete" 3 "lsm_volume_delete" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_delete \- Delete a volume.
+.SH SYNOPSIS
+.B "int" lsm_volume_delete
+.BI "(lsm_connect *" conn ","
+.BI "lsm_volume *" volume ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "volume" 12
+Pointer of lsm_volume that is to be deleted.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous
+action on this, a job will be created and could be tracked
+via \fBlsm_job_status_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Deletes a volume/LUN and its data is lost!
+If specified volume is masked to any access_group, it cannot be deleted.
+You may use `\fBlsm_access_groups_granted_to_volume\fP` and
+`\fBlsm_volume_unmask\fP` before `\fBlsm_volume_delete\fP`.
+If specified volume is has child dependency, it cannot be deleted.
+You may use `\fBlsm_volume_child_dependency\fP` and
+`\fBlsm_volume_child_dependency_delete\fP` before `\fBlsm_volume_delete\fP`.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_DELETE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.
+    * LSM_ERR_HAS_CHILD_DEPENDENCY
+        Specified volume has child dependencies.

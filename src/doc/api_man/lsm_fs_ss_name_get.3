@@ -1,0 +1,18 @@
+.TH "lsm_fs_ss_name_get" 3 "lsm_fs_ss_name_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_ss_name_get \- Retrieves the name for the file system snapshot.
+.SH SYNOPSIS
+.B "const char  *" lsm_fs_ss_name_get
+.BI "(lsm_fs_ss *" ss ");"
+.SH ARGUMENTS
+.IP "ss" 12
+File system snapshot to retrieve name for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the name for the file system snapshot.
+.SH "NOTE"
+Address returned is valid until lsm_fs_ss gets freed, copy return
+value if you need longer scope. Do not free returned string.
+.SH "RETURN"
+string. NULL if argument 'ss' is NULL or not a valid lsm_fs_ss pointer.

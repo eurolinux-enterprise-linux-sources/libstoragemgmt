@@ -1,0 +1,60 @@
+.TH "lsm_fs_clone" 3 "lsm_fs_clone" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_clone \- Clones an existing file system
+.SH SYNOPSIS
+.B "int" lsm_fs_clone
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" src_fs ","
+.BI "const char *" name ","
+.BI "lsm_fs_ss *" optional_ss ","
+.BI "lsm_fs **" cloned_fs ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "src_fs" 12
+Pointer of lsm_fs for source file system.
+.IP "name" 12
+String. Human recognizable name for new file system, might be altered
+or ignored by certain storage system.
+.IP "optional_ss" 12
+Pointer of lsm_fs_ss. File system snapshot to base clone from.
+Set to NULL of not needed..
+.IP "cloned_fs" 12
+Output pointer of lsm_fs for the newlly created file system.
+Will be NULL if storage system support asynchronous action on this.
+Returned value must be freed with a call to \fBlsm_fs_record_free\fP.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous action
+on this, a job will be created and could be tracked via
+\fBlsm_job_status_fs_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Create a point in time read writeable space efficient copy of
+specified file system, also know as read writeable snapshot.
+The new file system will reside in the same pool of specified file
+system.
+.SH "CAPABILITY"
+LSM_CAP_FS_CLONE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_FS
+        When file system not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

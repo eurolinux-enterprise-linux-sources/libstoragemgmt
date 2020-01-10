@@ -1,0 +1,19 @@
+.TH "lsm_battery_record_free" 3 "lsm_battery_record_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_battery_record_free \- Frees the memory for an individual battery
+.SH SYNOPSIS
+.B "int" lsm_battery_record_free
+.BI "(lsm_battery *" b ");"
+.SH ARGUMENTS
+.IP "b" 12
+lsm_battery to release memory for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Frees the memory for an individual lsm_battery
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_battery pointer.

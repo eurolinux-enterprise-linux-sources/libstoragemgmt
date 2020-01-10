@@ -1,0 +1,41 @@
+.TH "lsm_disk_type_get" 3 "lsm_disk_type_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_type_get \- Retrieves the disk type.
+.SH SYNOPSIS
+.B "lsm_disk_type" lsm_disk_type_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve type for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the type for the disk. Possible values are:
+    * LSM_DISK_TYPE_UNKNOWN
+        Unknown of argument 'd' is NULL.
+    * LSM_DISK_TYPE_OTHER
+        Vendor specific.
+    * LSM_DISK_TYPE_ATA
+        IDE/ATA disk.
+    * LSM_DISK_TYPE_SATA
+        SATA disk.
+    * LSM_DISK_TYPE_SAS
+        SAS disk.
+    * LSM_DISK_TYPE_FC
+        FC disk.
+    * LSM_DISK_TYPE_SOP
+        SCSI over PCI-E for Solid State Storage.
+    * LSM_DISK_TYPE_SCSI
+        SCSI disk.
+    * LSM_DISK_TYPE_LUN
+        LUN from external storage array.
+    * LSM_DISK_TYPE_NL_SAS
+        NL_SAS disk (SATA disk using SAS interface).
+    * LSM_DISK_TYPE_HDD
+        Failback value for hard disk drive(rotational).
+    * LSM_DISK_TYPE_SSD
+        Solid State Disk.
+    * LSM_DISK_TYPE_HYBRID
+        Combination of HDD and SSD.
+.SH "RETURN"
+string. NULL if argument 'd' is NULL or not a valid lsm_disk pointer.

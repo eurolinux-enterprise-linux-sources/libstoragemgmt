@@ -1,0 +1,51 @@
+.TH "lsm_fs_ss_create" 3 "lsm_fs_ss_create" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_ss_create \- Creates a file system snapshot
+.SH SYNOPSIS
+.B "int" lsm_fs_ss_create
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" fs ","
+.BI "const char *" name ","
+.BI "lsm_fs_ss **" snapshot ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "fs" 12
+Pointer of lsm_fs to create snapshot.
+.IP "name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage system.
+.IP "snapshot" 12
+Output pointer of lsm_fs_ss for newly created snapshot.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous action
+on this, a job will be created and could be tracked via
+\fBlsm_job_status_ss_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Creates a new file system snapshot.
+.SH "CAPABILITY"
+LSM_CAP_FS_SNAPSHOT_CREATE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_FS
+        When file system not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready for volume creation.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

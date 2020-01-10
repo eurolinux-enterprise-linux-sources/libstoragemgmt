@@ -1,0 +1,57 @@
+.TH "lsm_fs_create" 3 "lsm_fs_create" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_create \- Creates a new file system
+.SH SYNOPSIS
+.B "int" lsm_fs_create
+.BI "(lsm_connect *" conn ","
+.BI "lsm_pool *" pool ","
+.BI "const char *" name ","
+.BI "uint64_t " size_bytes ","
+.BI "lsm_fs **" fs ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "pool" 12
+Pointer of lsm_pool.
+.IP "name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage system.
+.IP "size_bytes" 12
+uint64_t. Size of new file system in bytes, actual size might be bigger
+than requested and will be based on array rounding to block size,
+.IP "fs" 12
+Output pointer of lsm_fs. Will be NULL if storage system support
+asynchronous action on this.
+Returned value must be freed with \fBlsm_fs_record_free\fP.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous
+action on this, a job will be created and could be tracked via
+\fBlsm_job_status_fs_get\fP.
+NULL if storage system does not support asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Creates a new file system for NFS or CIFS share.
+.SH "CAPABILITY"
+LSM_CAP_FS_CREATE
+.SH "RETURN"
+LSM_ERR_OK on success, LSM_ERR_JOB_STARTED if async. ,
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_POOL
+        When pool not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready for file system creation.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

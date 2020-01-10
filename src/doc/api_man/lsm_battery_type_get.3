@@ -1,0 +1,23 @@
+.TH "lsm_battery_type_get" 3 "lsm_battery_type_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_battery_type_get \- Retrieves the type for the battery.
+.SH SYNOPSIS
+.B "lsm_battery_type" lsm_battery_type_get
+.BI "(lsm_battery *" b ");"
+.SH ARGUMENTS
+.IP "b" 12
+Battery to retrieve type for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves the type for the battery.
+.SH "RETURN"
+lsm_battery_type. Possible values are:
+    * LSM_BATTERY_TYPE_UNKNOWN
+        Unknown or no support or invalid lsm_battery pointer.
+    * LSM_BATTERY_TYPE_OTHER
+        Vendor specific type.
+    * LSM_BATTERY_TYPE_CAPACITOR
+        Super capacitor.
+    * LSM_BATTERY_TYPE_CHEMICAL
+        Chemical battery, e.g. Li-ion battery.

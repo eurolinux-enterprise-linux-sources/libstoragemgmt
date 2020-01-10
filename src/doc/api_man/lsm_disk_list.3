@@ -1,0 +1,53 @@
+.TH "lsm_disk_list" 3 "lsm_disk_list" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_list \- Gets a list of disks on this connection.
+.SH SYNOPSIS
+.B "int" lsm_disk_list
+.BI "(lsm_connect *" conn ","
+.BI "const char *" search_key ","
+.BI "const char *" search_value ","
+.BI "lsm_disk **" disks[] ","
+.BI "uint32_t *" count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "search_key" 12
+Search key(NULL for all).
+Valid search keys are: "id", "system_id".
+.IP "search_value" 12
+Search value.
+.IP "disks[]" 12
+Output pointer of lsm_disk array. It should be manually freed by
+\fBlsm_disk_record_array_free\fP.
+.IP "count" 12
+Output pointer of uint32_t. Number of disks.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Gets a list of disks on this connection.
+Disk properties could be retrieved by these functions:
+    * \fBlsm_disk_id_get\fP
+    * \fBlsm_disk_name_get\fP
+    * \fBlsm_disk_system_id_get\fP
+    * \fBlsm_disk_type_get\fP
+    * \fBlsm_disk_number_of_blocks_get\fP
+    * \fBlsm_disk_block_size_get\fP
+    * \fBlsm_disk_status_get\fP
+    * \fBlsm_disk_location_get\fP
+    * \fBlsm_disk_rpm_get\fP
+    * \fBlsm_disk_link_type_get\fP
+    * \fBlsm_disk_vpd83_get\fP
+.SH "CAPABILITY"
+LSM_CAP_DISKS
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success or searched value not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags or invalid search
+        key.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

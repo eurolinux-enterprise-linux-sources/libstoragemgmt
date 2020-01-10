@@ -1,0 +1,35 @@
+.TH "lsm_volume_ident_led_off" 3 "lsm_volume_ident_led_off" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_ident_led_off \- Turn off the identification LED for the specified volume.
+.SH SYNOPSIS
+.B "int" lsm_volume_ident_led_off
+.BI "(lsm_connect *" conn ","
+.BI "lsm_volume *" volume ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "volume" 12
+Pointer of lsm_volume.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "DESCRIPTION"
+
+
+Only available for hardware RAID cards.
+Turn off the identification LED for the specified volume.
+.SH "VERSION"
+1.3
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_LED
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

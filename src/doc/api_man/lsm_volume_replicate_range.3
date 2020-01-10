@@ -1,0 +1,65 @@
+.TH "lsm_volume_replicate_range" 3 "lsm_volume_replicate_range" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_replicate_range \- Replicates a portion of a volume to a volume.
+.SH SYNOPSIS
+.B "int" lsm_volume_replicate_range
+.BI "(lsm_connect *" conn ","
+.BI "lsm_replication_type " rep_type ","
+.BI "lsm_volume *" source ","
+.BI "lsm_volume *" dest ","
+.BI "lsm_block_range **" ranges ","
+.BI "uint32_t " num_ranges ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "rep_type" 12
+lsm_replication_type. Valid values are:
+* LSM_VOLUME_REPLICATE_CLONE
+   Point in time read writeable space efficient copy of
+   data. Also know as read writeable snapshot.
+* LSM_VOLUME_REPLICATE_COPY
+   Full bitwise copy of the data (occupies full space).
+.IP "source" 12
+Pointer of replication source lsm_volume.
+.IP "dest" 12
+Pointer of replication target lsm_volume. Could be the same as source.
+.IP "ranges" 12
+Array of lsm_block_range. Please use
+\fBlsm_block_range_record_array_alloc\fP and \fBlsm_block_range_record_alloc\fP
+to create it.
+.IP "num_ranges" 12
+uint32_t. Number of entries in ranges.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous
+action on this, a job will be created and could be tracked
+via \fBlsm_job_status_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Replicates a portion of specified source volume to target volume.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_COPY_RANGE
+LSM_CAP_VOLUME_COPY_RANGE_CLONE
+LSM_CAP_VOLUME_COPY_RANGE_COPY
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid replication type.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_NOT_FOUND_POOL
+        When pool not found.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

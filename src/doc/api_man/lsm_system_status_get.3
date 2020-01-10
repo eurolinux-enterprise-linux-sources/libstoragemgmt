@@ -1,0 +1,26 @@
+.TH "lsm_system_status_get" 3 "lsm_system_status_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_system_status_get \- Retrieves status of the system.
+.SH SYNOPSIS
+.B "uint32_t" lsm_system_status_get
+.BI "(lsm_system *" s ");"
+.SH ARGUMENTS
+.IP "s" 12
+System to retrieve read cache percentage for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves status of the specified system which is a bit sensitive field.
+Possible values are:
+    * LSM_SYSTEM_STATUS_UNKNOWN:
+        Unknown.
+    * LSM_SYSTEM_STATUS_OK:
+        Every is OK.
+    * LSM_SYSTEM_STATUS_ERROR:
+        An error has occurred causing the system to stop. Example:
+         * A whole disk enclosure down.
+         * All controllers down.
+         * Internal hardware(like, memory) down and no redundant part.
+.SH "RETURN"
+uint32_t. Returns UINT32_MAX if argument 's' is NULL or not a valid
+lsm_system pointer.

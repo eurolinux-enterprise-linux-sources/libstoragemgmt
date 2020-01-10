@@ -1,0 +1,21 @@
+.TH "lsm_error_debug_data_get" 3 "lsm_error_debug_data_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_error_debug_data_get \- Retrieves the debug data from the error.
+.SH SYNOPSIS
+.B "void  *" lsm_error_debug_data_get
+.BI "(lsm_error_ptr " e ","
+.BI "uint32_t *" size ");"
+.SH ARGUMENTS
+.IP "e" 12
+The lsm_error to retrieves debug data from.
+.IP "size" 12
+uint32_t pointer. The output pointer for debug data size.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the debug data for the specified lsm_error.
+.SH "NOTE"
+Address returned is valid until lsm_error gets freed, copy return
+value if you need longer scope. Do not free returned pointer.
+.SH "RETURN"
+void *. NULL if argument 'e' is NULL or not a valid lsm_error_ptr.

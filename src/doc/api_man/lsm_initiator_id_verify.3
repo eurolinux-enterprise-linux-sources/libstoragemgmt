@@ -1,0 +1,29 @@
+.TH "lsm_initiator_id_verify" 3 "lsm_initiator_id_verify" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_initiator_id_verify \- Verifies if initiator id is valid.
+.SH SYNOPSIS
+.B "int" lsm_initiator_id_verify
+.BI "(const char *" init_id ","
+.BI "lsm_access_group_init_type *" init_type ");"
+.SH ARGUMENTS
+.IP "init_id" 12
+String to verify.
+.IP "init_type" 12
+lsm_access_group pointer. The type of initiator ID.
+You may set it to LSM_ACCESS_GROUP_INIT_TYPE_UNKNOWN, this function
+will try iSCSI and WWPN, and modify this argument to valid type of
+initiator type.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Verifies whether specified initiator is valid:
+    * iSCSI:
+        Starting with "iqn", "eui", or "naa".
+    * WWPN:
+        16 hex digits(0-9a-fA-F).
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        Is valid initiator.
+    * LSM_ERR_INVALID_ARGUMENT
+        Not a valid initiator or any argument is NULL.

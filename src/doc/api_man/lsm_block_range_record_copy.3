@@ -1,0 +1,17 @@
+.TH "lsm_block_range_record_copy" 3 "lsm_block_range_record_copy" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_block_range_record_copy \- Duplicates a block_range record.
+.SH SYNOPSIS
+.B "lsm_block_range  *" lsm_block_range_record_copy
+.BI "(lsm_block_range *" source ");"
+.SH ARGUMENTS
+.IP "source" 12
+Pointer of lsm_block_range to duplicate.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Duplicates a lsm_block_range record.
+.SH "RETURN"
+Pointer of lsm_block_range. NULL on memory allocation failure or
+invalid lsm_block_range pointer.
+Should be freed by \fBlsm_block_range_record_free\fP.

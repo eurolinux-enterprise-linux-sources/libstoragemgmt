@@ -1,0 +1,44 @@
+.TH "lsm_local_disk_led_status_get" 3 "lsm_local_disk_led_status_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_led_status_get \- Query disk LED status.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_led_status_get
+.BI "(const char *" disk_path ","
+.BI "uint32_t *" led_status ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_path" 12
+String. The path of disk, example "/dev/sdb".
+.IP "led_status" 12
+Output pointer of uint32_t. which is a bit sensitive field.
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be retrieved via
+\fBlsm_error_message_get\fP. Memory should be freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.4
+.SH "DESCRIPTION"
+Query the disk LED status of specified disk path.
+Require permission to open specified disk path(root user or disk group).
+
+The output led_status is a bit sensitive field:
+    * LSM_DISK_LED_STATUS_UNKNOWN
+    * LSM_DISK_LED_STATUS_IDENT_ON
+    * LSM_DISK_LED_STATUS_IDENT_OFF
+    * LSM_DISK_LED_STATUS_IDENT_UNKNOWN
+    * LSM_DISK_LED_STATUS_FAULT_ON
+    * LSM_DISK_LED_STATUS_FAULT_OFF
+    * LSM_DISK_LED_STATUS_FAULT_UNKNOWN
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.
+    * LSM_ERR_NOT_FOUND_DISK
+        When provided disk path not found.
+    * LSM_ERR_PERMISSION_DENIED
+        Insufficient permission to access provided disk path.
+    * LSM_ERR_NO_SUPPORT
+        Action is not supported.

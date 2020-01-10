@@ -1,0 +1,29 @@
+.TH "lsm_volume_vpd83_verify" 3 "lsm_volume_vpd83_verify" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_vpd83_verify \- 
+.SH SYNOPSIS
+.B "int" lsm_volume_vpd83_verify
+.BI "(const char *" vpd83 ");"
+.SH ARGUMENTS
+.IP "vpd83" 12
+String to verify.
+.SH "DESCRIPTION"
+\fIparam\fP vpd83         VPD string to check
+\fIreturn\fP Error code as enumerated by \ref lsm_error_number.
+\fIretval\fP LSM_ERR_OK if vpd is OK
+\fIretval\fP LSM_INVALID_ARGUMENT otherwise.
+lsm_volume_vpd83_verify - Verifies if volume vpd83 is valid.
+
+Verifies whether specified string is a valid volume vpd83:
+    * For string start with '2' or '3' or '5', the valid vpd83 should
+      be 16 hex digits(0-9a-f).
+    * For string start with '6', the valid vpd83 should be 32 hex
+      digits(0-9a-f).
+.SH "VERSION"
+1.0
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        Is valid volume vpd83.
+    * LSM_ERR_INVALID_ARGUMENT
+        Not a valid volume vpd83 or argument is NULL.

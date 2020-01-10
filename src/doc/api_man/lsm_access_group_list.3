@@ -1,0 +1,48 @@
+.TH "lsm_access_group_list" 3 "lsm_access_group_list" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_access_group_list \- Retrieves a list of access groups.
+.SH SYNOPSIS
+.B "int" lsm_access_group_list
+.BI "(lsm_connect *" conn ","
+.BI "const char *" search_key ","
+.BI "const char *" search_value ","
+.BI "lsm_access_group **" groups[] ","
+.BI "uint32_t *" group_count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "search_key" 12
+Search key(NULL for all).
+Valid search keys are: "id", "system_id".
+.IP "search_value" 12
+Search value.
+.IP "groups[]" 12
+Output pointer of lsm_access_group array. It should be manually freed by
+\fBlsm_access_group_record_array_free\fP.
+.IP "group_count" 12
+Output pointer of uint32_t. Number of access groups.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Gets a list of access group on this connection. Access group
+is also known as host group on some storage system, it defines a group
+of initiators sharing the same access to the volume.
+Access group properties could be retrieved by these functions:
+    * \fBlsm_access_group_id_get\fP
+    * \fBlsm_access_group_name_get\fP
+    * \fBlsm_access_group_system_id_get\fP
+    * \fBlsm_access_group_initiator_id_get\fP
+.SH "CAPABILITY"
+LSM_CAP_ACCESS_GROUPS
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags or invalid search
+        key.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

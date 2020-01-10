@@ -1,0 +1,52 @@
+.TH "lsm_target_port_list" 3 "lsm_target_port_list" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_target_port_list \- Gets a list of target ports on this connection.
+.SH SYNOPSIS
+.B "int" lsm_target_port_list
+.BI "(lsm_connect *" conn ","
+.BI "const char *" search_key ","
+.BI "const char *" search_value ","
+.BI "lsm_target_port **" target_ports[] ","
+.BI "uint32_t *" count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "search_key" 12
+Search key(NULL for all).
+Valid search keys are: "id", and "system_id".
+.IP "search_value" 12
+Search value.
+.IP "target_ports[]" 12
+Output pointer of lsm_target_port array.
+Return value must be freed with a call to
+\fBlsm_target_port_record_array_free\fP.
+.IP "count" 12
+Output pointer of uint32_t. Number of target ports.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Gets a list of target ports on this connection.
+Target port are the front-end port of storage system which storage
+user/client connect to and get storage service from.
+Target port properties could be retrieved by these functions:
+    * \fBlsm_target_port_id_get\fP
+    * \fBlsm_target_port_type_get\fP
+    * \fBlsm_target_port_system_id_get\fP
+    * \fBlsm_target_port_network_address_get\fP
+    * \fBlsm_target_port_physical_address_get\fP
+    * \fBlsm_target_port_physical_name_get\fP
+    * \fBlsm_target_port_service_address_get\fP
+.SH "CAPABILITY"
+LSM_CAP_TARGET_PORTS
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success or searched value not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags or invalid search
+        key.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

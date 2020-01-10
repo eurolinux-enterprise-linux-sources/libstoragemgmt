@@ -1,0 +1,54 @@
+.TH "lsm_fs_resize" 3 "lsm_fs_resize" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_resize \- Resizes a file system
+.SH SYNOPSIS
+.B "int" lsm_fs_resize
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" fs ","
+.BI "uint64_t " new_size_bytes ","
+.BI "lsm_fs **" rfs ","
+.BI "char **" job_id ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "fs" 12
+Pointer of lsm_fs to re-size
+.IP "new_size_bytes" 12
+uint64_t. New size of file system in bytes, actual size might be bigger
+than requested and will be based on array rounding to block size,
+.IP "rfs" 12
+Output pointer of updated lsm_fs. Might be NULL if storage system
+support asynchronous action on this.
+.IP "job_id" 12
+Output pointer of string. If storage system support asynchronous action
+on this, a job will be created and could be tracked via
+\fBlsm_job_status_fs_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Resize the specified file system.
+.SH "CAPABILITY"
+LSM_CAP_FS_RESIZE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_FS
+        When file system not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready for volume resizing.
+    * LSM_ERR_NO_STATE_CHANGE
+        Requested size if identical to current size.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

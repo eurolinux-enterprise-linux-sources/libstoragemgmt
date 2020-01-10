@@ -1,0 +1,42 @@
+.TH "lsm_volume_mask" 3 "lsm_volume_mask" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_mask \- Grants access to a volume for the specified group
+.SH SYNOPSIS
+.B "int" lsm_volume_mask
+.BI "(lsm_connect *" conn ","
+.BI "lsm_access_group *" access_group ","
+.BI "lsm_volume *" volume ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "access_group" 12
+Pointer of lsm_access_group.
+.IP "volume" 12
+Pointer of lsm_volume.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Grants access to a volume for the specified group, also known as
+LUN masking or mapping.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_MASK
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid lsm_access_group pointer or
+        invalid lsm_volume.
+    * LSM_ERR_NOT_FOUND_ACCESS_GROUP
+        When access group not found.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_NO_STATE_CHANGE
+        When specified volume is already masked to specified access
+        group.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

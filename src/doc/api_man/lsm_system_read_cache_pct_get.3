@@ -1,0 +1,23 @@
+.TH "lsm_system_read_cache_pct_get" 3 "lsm_system_read_cache_pct_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_system_read_cache_pct_get \- Retrieves read cache percentage of the system.
+.SH SYNOPSIS
+.B "int" lsm_system_read_cache_pct_get
+.BI "(lsm_system *" s ");"
+.SH ARGUMENTS
+.IP "s" 12
+System to retrieve read cache percentage for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves read cache percentage of the specified system.
+.SH "CAPABILITY"
+LSM_CAP_SYS_READ_CACHE_PCT_GET
+.SH "RETURN"
+int. Possible values are:
+    * >=0 and <= 100
+        Success.
+    * LSM_SYSTEM_READ_CACHE_PCT_NO_SUPPORT
+        No Support.
+    * LSM_SYSTEM_READ_CACHE_PCT_UNKNOWN
+        System pointer is NULL or bug.

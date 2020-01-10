@@ -110,7 +110,7 @@ def _parse_hpssacli_output(output):
     """
     required_sections = ['Array:', 'unassigned', 'HBA Drives', 'array',
                          'Controller Status', 'Cache Status',
-                         'Battery/Capacitor Status']
+                         'Battery/Capacitor Status', 'Unassigned', 'Array']
 
     output_lines = [
         l for l in output.split("\n")
@@ -331,18 +331,15 @@ class SmartArray(IPlugin):
         self._sacli_bin = None
         self._tmo_ms = 30000
 
-    def _find_sacli(self):
+    @staticmethod
+    def find_sacli():
         """
-        Try _DEFAULT_MDADM_BIN_PATHS
+        Try _DEFAULT_BIN_PATHS, return None if not found.
         """
         for cur_path in SmartArray._DEFAULT_BIN_PATHS:
             if os.path.lexists(cur_path):
-                self._sacli_bin = cur_path
-
-        if not self._sacli_bin:
-            raise LsmError(
-                ErrorNumber.INVALID_ARGUMENT,
-                "SmartArray sacli is not installed correctly")
+                return cur_path
+        return None
 
     @_handle_errors
     def plugin_register(self, uri, password, timeout, flags=Client.FLAG_RSVD):
@@ -353,7 +350,11 @@ class SmartArray(IPlugin):
         uri_parsed = uri_parse(uri)
         self._sacli_bin = uri_parsed.get('parameters', {}).get('hpssacli')
         if not self._sacli_bin:
-            self._find_sacli()
+            self._sacli_bin = SmartArray.find_sacli()
+            if not self._sacli_bin:
+                raise LsmError(
+                    ErrorNumber.INVALID_ARGUMENT,
+                    "SmartArray sacli is not installed correctly")
 
         self._sacli_exec(['version'], flag_convert=False)
 
@@ -458,8 +459,11 @@ class SmartArray(IPlugin):
         for ctrl_name in list(ctrl_all_show.keys()):
             ctrl_data = ctrl_all_show[ctrl_name]
             sys_id = _sys_id_of_ctrl_data(ctrl_data)
-            (status, status_info) = _sys_status_of(ctrl_all_status[ctrl_name])
-
+            try:
+                (status, status_info) = _sys_status_of(ctrl_all_status[ctrl_name])
+            except KeyError:
+                ctrl_name_modified = ctrl_name.replace(' (HBA Mode)', '', 1)
+                (status, status_info) = _sys_status_of(ctrl_all_status[ctrl_name_modified])
             plugin_data = "%s" % ctrl_data['Slot']
             try:
                 fw_ver = "%s" % ctrl_data['Firmware Version']
@@ -709,7 +713,7 @@ class SmartArray(IPlugin):
                                     sys_id, ctrl_num, array_key_name,
                                     flag_free=False))
 
-                if key_name == 'unassigned' or key_name == 'HBA Drives':
+                if key_name in ('Unassigned', 'unassigned', 'HBA Drives'):
                     for array_key_name in list(ctrl_data[key_name].keys()):
                         if array_key_name.startswith("physicaldrive"):
                             rc_lsm_disks.append(
@@ -939,15 +943,15 @@ class SmartArray(IPlugin):
         sys_output = self._sacli_exec(
             ['ctrl', "slot=%s" % ctrl_num, 'show'])
 
-        sys_id = list(_sys_id_of_ctrl_data(sys_output.values()[0]))
+        sys_id = _sys_id_of_ctrl_data(list(sys_output.values())[0])
         # API code already checked empty 'disks', we will for sure get
         # valid 'ctrl_num' and 'hp_disk_ids'.
 
         pd_output = self._sacli_exec(
             ['ctrl', "slot=%s" % ctrl_num, 'pd', hp_disk_ids[0], 'show'])
 
-        if list(pd_output.values())[0].keys()[0].lower().startswith("array "):
-            hp_array_id = list(pd_output.values())[0].keys()[0][len("array "):]
+        if list(list(pd_output.values())[0].keys())[0].lower().startswith("array "):
+            hp_array_id = list(list(pd_output.values())[0].keys())[0][len("array "):]
             hp_array_id = "Array:%s" % hp_array_id
         else:
             raise LsmError(
@@ -989,10 +993,10 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
                 ).values()[0]
 
-            for key_name in ctrl_data.keys():
+            for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
                     continue
-                for array_key_name in ctrl_data[key_name].keys():
+                for array_key_name in list(ctrl_data[key_name].keys()):
                     if array_key_name == "Logical Drive: %s" % ld_num:
                         raise LsmError(
                             ErrorNumber.PLUGIN_BUG,
@@ -1025,10 +1029,10 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
                 ).values()[0]
 
-            for key_name in ctrl_data.keys():
+            for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
                     continue
-                for array_key_name in ctrl_data[key_name].keys():
+                for array_key_name in list(ctrl_data[key_name].keys()):
                     if array_key_name == "Logical Drive: %s" % ld_num:
                         raise LsmError(
                             ErrorNumber.PLUGIN_BUG,
@@ -1120,7 +1124,7 @@ class SmartArray(IPlugin):
         ctrl_all_show = self._sacli_exec(
             ["ctrl", "all", "show", "config", "detail"])
 
-        for ctrl_name in ctrl_all_show.keys():
+        for ctrl_name in list(ctrl_all_show.keys()):
             ctrl_data = ctrl_all_show[ctrl_name]
             bat_count = int(ctrl_data.get('Battery/Capacitor Count', 0))
             if bat_count == 0:

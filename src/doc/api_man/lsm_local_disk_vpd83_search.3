@@ -1,0 +1,36 @@
+.TH "lsm_local_disk_vpd83_search" 3 "lsm_local_disk_vpd83_search" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_vpd83_search \- Search disks by VPD83 string.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_vpd83_search
+.BI "(const char *" vpd83 ","
+.BI "lsm_string_list **" disk_path_list ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "vpd83" 12
+String. The SCSI VPD 0x83 page NAA type ID.
+.IP "disk_path_list" 12
+Output pointer of \fIlsm_string_list\fP. The format of
+disk path will be like "/dev/sdb" for SCSI or ATA disk.
+NULL if no found or got error.
+Memory should be freed by \fBlsm_string_list_free\fP.
+.IP "lsm_err" 12
+Output pointer of \fIlsm_error\fP. Error message could be
+retrieved via \fBlsm_error_message_get\fP. Memory should be
+freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Search all the disk paths of specified SCSI VPD 0x83 page NAA type ID.
+For any ATA and other non-SCSI protocol disks supporting VPD 0x83 pages
+NAA ID, their disk path will also be included.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL.
+    * LSM_ERR_NO_MEMORY
+        When no memory.
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.

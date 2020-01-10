@@ -4,13 +4,25 @@ notrans_dist_man1_MANS = lsmcli.1 lsmd.1 \
 	smispy_lsmplugin.1 \
 	ontap_lsmplugin.1 \
 	targetd_lsmplugin.1 \
+	nfs_lsmplugin.1 \
 	nstor_lsmplugin.1
+
+notrans_dist_man3_MANS = libstoragemgmt.h.3
+
 if WITH_MEGARAID
 notrans_dist_man1_MANS += megaraid_lsmplugin.1
 endif
 
 if WITH_HPSA
 notrans_dist_man1_MANS += hpsa_lsmplugin.1
+endif
+
+if WITH_ARCCONF
+notrans_dist_man1_MANS += arcconf_lsmplugin.1
+endif
+
+if WITH_LOCAL
+notrans_dist_man1_MANS += local_lsmplugin.1
 endif
 
 notrans_dist_man5_MANS = lsmd.conf.5.in

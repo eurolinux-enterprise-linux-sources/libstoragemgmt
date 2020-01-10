@@ -1,0 +1,54 @@
+.TH "lsm_volume_raid_create" 3 "lsm_volume_raid_create" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_raid_create \- Create a RAID volume.
+.SH SYNOPSIS
+.B "int" lsm_volume_raid_create
+.BI "(lsm_connect *" conn ","
+.BI "const char *" name ","
+.BI "lsm_volume_raid_type " raid_type ","
+.BI "lsm_disk *" disks[] ","
+.BI "uint32_t " disk_count ","
+.BI "uint32_t " strip_size ","
+.BI "lsm_volume **" new_volume ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage system.
+.IP "raid_type" 12
+lsm_volume_raid_type. Please refer to the returns of
+\fBlsm_volume_raid_create_cap_get\fP function for supported RAID type.
+.IP "disks[]" 12
+An array of lsm_disk pointer.
+.IP "disk_count" 12
+The count of lsm_disk in 'disks' argument.
+.IP "strip_size" 12
+uint32_t. The strip size in bytes. Please refer to the returns of
+\fBlsm_volume_raid_create_cap_get\fP function for supported strip sizes.
+.IP "new_volume" 12
+Output pointer of lsm_volume for newly created volume.
+Returned value must be freed with a call to \fBlsm_volume_record_free\fP.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.2
+.SH "DESCRIPTION"
+Only available for hardware RAID cards.
+Create a disk RAID pool and allocate entire full space to new volume.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_RAID_CREATE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_DISK
+        When disk not found.
+    * LSM_ERR_DISK_NOT_FREE
+        When disk not free.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

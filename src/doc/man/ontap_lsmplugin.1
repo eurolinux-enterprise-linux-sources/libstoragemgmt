@@ -1,4 +1,4 @@
-.TH ontap_lsmplugin "1" "June 2015" "ontap_lsmplugin 1.4.0" "libStorageMgmt"
+.TH ontap_lsmplugin "1" "June 2015" "ontap_lsmplugin 1.6.1" "libStorageMgmt"
 .SH NAME
 ontap_lsmplugin -- LibstorageMgmt ONTAP Plugin
 
@@ -12,9 +12,10 @@ This plugin requires NetApp ONTAP storage array to enable these options:
     \fBoptions httpd.enable on\fR
     \fBoptions httpd.admin.enable on\fR
 
-This options is required for HTTPS connection:
+These options are required for HTTPS connection:
 
     \fBoptions httpd.admin.ssl.enable on\fR
+    \fBoptions tls.enable on\fR
 
 .SH URI
 To use this plugin, users should set their URI to this format:
@@ -25,6 +26,9 @@ To use this plugin, users should set their URI to this format:
 
     # HTTPS connection
     \fBontap+ssl://<username>@<ontap_filer>\fR
+
+    # HTTPS connection with certificate file
+    \fBontap+ssl://<username>@<ontap_filer>?ca_cert_file=<ca_cert_file_path>\fR
 
 .fi
 .TP
@@ -40,7 +44,20 @@ The \fBontap_filer_ip\fR is the NetApp ONTAP filer IP address or DNS name.
 .TP
 \fBURI parameters\fR
 
-No additional URI parameters are supported by this plugin.
+This URI parameter is supported by this plugin:
+
+.RS 7
+.TP
+\fBssl_verify=yes\fR
+By default, SSL connection does not verify hostname and certification.
+If this URI parameter is defined, all SSL verifications will be performed.
+
+.TP
+\fBca_cert_file=<ca_cert_file_path>\fR
+This parameter define the CA certification file path for SSL/TLS verification.
+If this URI parameter is defined, all SSL/TLS verifications will be performed
+no matter \fBssl_verify=yes\fR is defined or not.
+
 
 .SH Supported Hardware
 NetApp ONTAP 8.x is supported.

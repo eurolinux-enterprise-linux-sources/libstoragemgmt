@@ -1,0 +1,23 @@
+.TH "lsm_target_port_type_get" 3 "lsm_target_port_type_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_target_port_type_get \- Retrieve target port type
+.SH SYNOPSIS
+.B "lsm_target_port_type" lsm_target_port_type_get
+.BI "(lsm_target_port *" tp ");"
+.SH ARGUMENTS
+.IP "tp" 12
+Target port to retrieve type for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieve the type(FC/iSCSI/etc) of target port.
+.SH "RETURN"
+lsm_target_port_type. Valid values are:
+    * LSM_TARGET_PORT_TYPE_FC
+        FC
+    * LSM_TARGET_PORT_TYPE_FCOE
+        FCoE
+    * LSM_TARGET_PORT_TYPE_ISCSI
+        iSCSI
+    * LSM_TARGET_PORT_TYPE_OTHER
+        Vendor specific.

@@ -1,0 +1,19 @@
+.TH "lsm_error_last_get" 3 "lsm_error_last_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_error_last_get \- Retrieves the last error of the lsm connection.
+.SH SYNOPSIS
+.B "lsm_error_ptr" lsm_error_last_get
+.BI "(lsm_connect *" conn ");"
+.SH ARGUMENTS
+.IP "conn" 12
+lsm_connect pointer.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the last error of the lsm connection.
+.SH "NOTE"
+Address returned is valid until lsm_connect gets freed, copy
+return value if you need longer scope. Do not free returned pointer.
+.SH "RETURN"
+lsm_error_ptr. NULL if argument 'c' is NULL or not a valid lsm_connect
+pointer or no error exists.

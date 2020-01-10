@@ -1,0 +1,17 @@
+.TH "lsm_block_range_record_array_alloc" 3 "lsm_block_range_record_array_alloc" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_block_range_record_array_alloc \- Allocates a lsm_block_range array.
+.SH SYNOPSIS
+.B "lsm_block_range  **" lsm_block_range_record_array_alloc
+.BI "(uint32_t " size ");"
+.SH ARGUMENTS
+.IP "size" 12
+uint32_t. The size of lsm_block_range pointer array.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Allocates a lsm_block_range pointer array.
+.SH "RETURN"
+Pointer of lsm_block_range array. NULL on memory allocation failure or
+argument size is 0.
+Should be freed by \fBlsm_block_range_record_array_free\fP.

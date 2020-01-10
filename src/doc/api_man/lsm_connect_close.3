@@ -1,0 +1,22 @@
+.TH "lsm_connect_close" 3 "lsm_connect_close" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_connect_close \- Closes a connection to a storage provider.
+.SH SYNOPSIS
+.B "int" lsm_connect_close
+.BI "(lsm_connect *" conn ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection to close
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Closes a connection to a storage provisioning.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When not a valid lsm_connect pointer or invalid flags.

@@ -1,0 +1,76 @@
+.TH "lsm_volume_raid_create_cap_get" 3 "lsm_volume_raid_create_cap_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_raid_create_cap_get \- Retrieves supported capability of lsm_volume_raid_create()
+.SH SYNOPSIS
+.B "int" lsm_volume_raid_create_cap_get
+.BI "(lsm_connect *" conn ","
+.BI "lsm_system *" system ","
+.BI "uint32_t **" supported_raid_types ","
+.BI "uint32_t *" supported_raid_type_count ","
+.BI "uint32_t **" supported_strip_sizes ","
+.BI "uint32_t *" supported_strip_size_count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "system" 12
+Pointer of lsm_system.
+.IP "supported_raid_types" 12
+Output pointer of uint32_t array. Containing lsm_volume_raid_type
+values. Memory should be freed via \fBfree\fP. Valid values are:
+LSM_VOLUME_RAID_TYPE_RAID0
+   Stripe.
+LSM_VOLUME_RAID_TYPE_RAID1
+   Two disks Mirror
+LSM_VOLUME_RAID_TYPE_RAID3
+   Byte-level striping with dedicated parity
+LSM_VOLUME_RAID_TYPE_RAID4
+   Block-level striping with dedicated parity
+LSM_VOLUME_RAID_TYPE_RAID5
+   Block-level striping with distributed parity
+LSM_VOLUME_RAID_TYPE_RAID6
+   Block-level striping with two distributed parities,
+   aka, RAID-DP
+LSM_VOLUME_RAID_TYPE_RAID10
+   Stripe of mirrors
+LSM_VOLUME_RAID_TYPE_RAID15
+   Parity of mirrors
+LSM_VOLUME_RAID_TYPE_RAID16
+   Dual parity of mirrors
+LSM_VOLUME_RAID_TYPE_RAID50
+   Stripe of parities
+LSM_VOLUME_RAID_TYPE_RAID60
+   Stripe of dual parities
+LSM_VOLUME_RAID_TYPE_RAID51
+   Mirror of parities
+LSM_VOLUME_RAID_TYPE_RAID61
+   Mirror of dual parities
+LSM_VOLUME_RAID_TYPE_JBOD
+   Just bunch of disks, no parity, no striping.
+.IP "supported_raid_type_count" 12
+Output pointer of uint32_t. Indicate the item count of
+supported_raid_types array.
+.IP "supported_strip_sizes" 12
+The pointer of uint32_t array. Containing all supported strip sizes.
+Memory should be freed via \fBfree\fP.
+.IP "supported_strip_size_count" 12
+The pointer of uint32_t. Indicate the item count of
+supported_strip_sizes array.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.2
+.SH "DESCRIPTION"
+Only available for hardware RAID cards. Query all supported RAID types
+and strip sizes which could be used in \fBlsm_volume_raid_create\fP
+functions.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_RAID_CREATE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

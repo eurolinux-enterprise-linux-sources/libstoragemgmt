@@ -1,0 +1,57 @@
+.TH "lsm_disk_status_get" 3 "lsm_disk_status_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_status_get \- Retrieves status of specified disk.
+.SH SYNOPSIS
+.B "uint64_t" lsm_disk_status_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve status for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves status of the specified disk.
+.SH "RETURN"
+uint64_t. Status of the specified disk which is a bit sensitive field.
+Possible values are:
+    * LSM_DISK_STATUS_UNKNOWN
+        Plugin failed to query out the status of disk.
+    * LSM_DISK_STATUS_OK
+        Everything is OK.
+    * LSM_DISK_STATUS_OTHER
+        Vendor specific status.
+    * LSM_DISK_STATUS_PREDICTIVE_FAILURE
+        Disk is still functional but will fail soon.
+    * LSM_DISK_STATUS_ERROR
+        Error make disk not functional.
+    * LSM_DISK_STATUS_REMOVED
+        Disk was removed by administrator.
+    * LSM_DISK_STATUS_STARTING
+        Disk is starting up.
+    * LSM_DISK_STATUS_STOPPING
+        Disk is shutting down.
+    * LSM_DISK_STATUS_STOPPED
+        Disk is stopped by administrator.
+    * LSM_DISK_STATUS_INITIALIZING
+        Disk is not functional yet, internal storage system is
+        initializing this disk, it could be:
+            * Initialising new disk.
+            * Zeroing disk.
+            * Scrubbing disk data.
+    * LSM_DISK_STATUS_MAINTENANCE_MODE
+        In maintenance for bad sector scan, integrity check and etc It
+        might be combined with LSM_DISK_STATUS_OK or
+        LSM_DISK_STATUS_STOPPED for online maintenance or offline
+        maintenance.
+    * LSM_DISK_STATUS_SPARE_DISK
+        Disk is configured as spare disk.
+    * LSM_DISK_STATUS_RECONSTRUCT
+        Disk is reconstructing its data.
+    * LSM_DISK_STATUS_FREE
+        New in version 1.2, indicate the whole disk is not holding any
+        data or acting as a dedicate spare disk. This disk could be
+        assigned as a dedicated spare disk or used for creating pool.
+        If any spare disk(like those on NetApp ONTAP) does not require
+        any explicit action when assigning to pool, it should be treated
+        as free disk and marked as
+        LSM_DISK_STATUS_FREE|LSM_DISK_STATUS_SPARE_DISK.

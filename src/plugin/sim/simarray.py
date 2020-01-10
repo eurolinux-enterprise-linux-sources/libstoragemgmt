@@ -129,7 +129,7 @@ class PoolRAID(object):
 
 
 class BackStore(object):
-    VERSION = "4.0"
+    VERSION = "4.1"
     VERSION_SIGNATURE = 'LSM_SIMULATOR_DATA_%s_%s' % (VERSION, md5(VERSION))
     JOB_DEFAULT_DURATION = 1
     JOB_DATA_TYPE_VOL = 1
@@ -232,7 +232,7 @@ class BackStore(object):
             rpm INTEGER,
             link_type INTEGER,
             FOREIGN KEY(owner_pool_id)
-            REFERENCES pools(id) ON DELETE CASCADE );
+            REFERENCES pools(id) ON DELETE SET DEFAULT);
             """
         # owner_pool_id:
         #   Indicate this disk is used to assemble a pool
@@ -1068,10 +1068,11 @@ class BackStore(object):
 
     def _data_update(self, table, data_id, column_name, value):
         if value is None:
-            value = ''
-
-        sql_cmd = "UPDATE %s SET %s='%s' WHERE id='%s'" % \
-            (table, column_name, value, data_id)
+            sql_cmd = "UPDATE %s SET %s=NULL WHERE id='%s'" % \
+                (table, column_name, data_id)
+        else:
+            sql_cmd = "UPDATE %s SET %s='%s' WHERE id='%s'" % \
+                (table, column_name, value, data_id)
 
         self._sql_exec(sql_cmd)
 
@@ -1313,9 +1314,14 @@ class BackStore(object):
                 if dst_sim_vol_id != sim_vol_id:
                     # Don't raise error on volume internal replication.
                     raise LsmError(
-                        ErrorNumber.PLUGIN_BUG,
-                        "Requested volume is a replication source")
+                        ErrorNumber.HAS_CHILD_DEPENDENCY,
+                        "Requested volume has child dependency")
         if sim_vol['is_hw_raid_vol']:
+            # Reset disk roles
+            for d in self._data_find('disks_view',
+                                     'owner_pool_id="%s"' % sim_vol["pool_id"]):
+                self._data_update("disks", d["id"], 'role', None)
+
             # Delete the parent pool instead if found a HW RAID volume.
             self._data_delete("pools", 'id="%s"' % sim_vol['pool_id'])
         else:
@@ -1597,23 +1603,9 @@ class BackStore(object):
     def sim_fs_delete(self, sim_fs_id):
         self.sim_fs_of_id(sim_fs_id)
         if self.clone_dst_sim_fs_ids_of_src(sim_fs_id):
-            # TODO(Gris Ge): API does not have dedicate error for this
-            #                scenario.
             raise LsmError(
-                ErrorNumber.PLUGIN_BUG,
-                "Requested file system is a clone source")
-
-        if self.sim_fs_snaps(sim_fs_id):
-            raise LsmError(
-                ErrorNumber.PLUGIN_BUG,
-                "Requested file system has snapshot attached")
-
-        if self._data_find('exps', 'fs_id="%s"' % sim_fs_id):
-            # TODO(Gris Ge): API does not have dedicate error for this
-            #                scenario
-            raise LsmError(
-                ErrorNumber.PLUGIN_BUG,
-                "Requested file system is exported via NFS")
+                ErrorNumber.HAS_CHILD_DEPENDENCY,
+                "Requested file system has child dependency")
 
         self._data_delete("fss", 'id="%s"' % sim_fs_id)
 
@@ -2304,14 +2296,17 @@ class SimArray(object):
         return job_id
 
     @_handle_errors
-    def fs_child_dependency(self, fs_id, files, flags=0):
+    def fs_child_dependency(self, fs_id, files, flags=0, _internal_use=False):
         sim_fs_id = SimArray._sim_fs_id_of(fs_id)
-        self.bs_obj.trans_begin()
+        if _internal_use is False:
+            self.bs_obj.trans_begin()
         if self.bs_obj.clone_dst_sim_fs_ids_of_src(sim_fs_id) == [] and \
            self.bs_obj.sim_fs_snaps(sim_fs_id) == []:
-            self.bs_obj.trans_rollback()
+            if _internal_use is False:
+                self.bs_obj.trans_rollback()
             return False
-        self.bs_obj.trans_rollback()
+        if _internal_use is False:
+            self.bs_obj.trans_rollback()
         return True
 
     @_handle_errors
@@ -2321,7 +2316,7 @@ class SimArray(object):
         all snapshot of this source file system.
         """
         self.bs_obj.trans_begin()
-        if self.fs_child_dependency(fs_id, files) is False:
+        if self.fs_child_dependency(fs_id, files, _internal_use=True) is False:
             raise LsmError(
                 ErrorNumber.NO_STATE_CHANGE,
                 "No snapshot or fs clone target found for this file system")
@@ -2330,7 +2325,7 @@ class SimArray(object):
         self.bs_obj.sim_fs_src_clone_break(src_sim_fs_id)
         self.bs_obj.sim_fs_snap_del_by_fs(src_sim_fs_id)
         job_id = self._job_create()
-        self.bs_obj.trans_begin()
+        self.bs_obj.trans_commit()
         return job_id
 
     @staticmethod

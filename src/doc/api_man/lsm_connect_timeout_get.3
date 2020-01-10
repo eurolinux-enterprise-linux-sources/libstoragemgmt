@@ -1,0 +1,26 @@
+.TH "lsm_connect_timeout_get" 3 "lsm_connect_timeout_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_connect_timeout_get \- Gets the time-out for this connection.
+.SH SYNOPSIS
+.B "int" lsm_connect_timeout_get
+.BI "(lsm_connect *" conn ","
+.BI "uint32_t *" timeout ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "timeout" 12
+Output pointer of uint32_t. Time-out in ms.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Gets the time-out for this connection.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.

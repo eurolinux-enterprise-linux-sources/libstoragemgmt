@@ -1,0 +1,17 @@
+.TH "lsm_string_list_copy" 3 "lsm_string_list_copy" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_string_list_copy \- Duplicates a lsm_string_list record.
+.SH SYNOPSIS
+.B "lsm_string_list  *" lsm_string_list_copy
+.BI "(lsm_string_list *" src ");"
+.SH ARGUMENTS
+.IP "src" 12
+Pointer of lsm_string_list to duplicate.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Duplicates a lsm_string_list record.
+.SH "RETURN"
+Pointer of lsm_string_list. NULL on memory allocation failure or invalid
+lsm_string_list pointer. Should be freed by
+\fBlsm_string_list_record_free\fP.

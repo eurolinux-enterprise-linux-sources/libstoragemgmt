@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Copyright (C) 2011-2014 Red Hat, Inc.
 #
@@ -32,6 +32,7 @@ import hashlib
 import os
 from subprocess import Popen, PIPE
 from optparse import OptionParser
+import copy
 
 (OP_SYS, OP_POOL, OP_VOL, OP_FS, OP_EXPORTS, OP_SS) = \
     ('SYSTEMS', 'POOLS', 'VOLUMES', 'FS', 'EXPORTS',
@@ -87,13 +88,14 @@ def rs(l):
         random.choice(string.ascii_uppercase) for _ in range(l)))
 
 
-def call(command, expected_rc=0, expected_rcs=None):
+def call(command, expected_rc=0, expected_rcs=None, env=None):
     """
     Call an executable and return a tuple of exitcode, stdout, stderr
     Args:
         command:        An array that has the command to execute
         expected_rc:    The expected exit code of the command
-        expected_rcs:   Msg for the expected error code string
+        expected_rcs:   The expected list of possible error codes
+        env:            The environment to use
     """
 
     if code_coverage:
@@ -110,12 +112,14 @@ def call(command, expected_rc=0, expected_rcs=None):
         expected_rcs_str = " ".join(str(x) for x in expected_rcs)
         print(actual_command, 'EXPECTED Exit codes [%s]' % expected_rcs)
 
-    process = Popen(actual_command, stdout=PIPE, stderr=PIPE)
+    if not env:
+        env = os.environ
+
+    process = Popen(actual_command, stdout=PIPE, stderr=PIPE, env=env)
     out = process.communicate()
 
-    if process.returncode != expected_rc and \
-       expected_rcs is not None and \
-       process.returncode not in expected_rcs:
+    if (expected_rc is None and process.returncode != expected_rc) or \
+       (expected_rcs is not None and process.returncode not in expected_rcs):
         if expected_rcs is None:
             raise RuntimeError("exit code != %s, actual= %s, stdout= %s, "
                                "stderr= %s" % (expected_rc, process.returncode,
@@ -290,11 +294,11 @@ def clone_fs(fs_id):
     return r[0][ID]
 
 
-def fs_child_dependancy(fs_id):
+def fs_child_dependency(fs_id):
     call([cmd, 'fs-dependants', '--fs', fs_id])
 
 
-def fs_child_dependancy_rm(fs_id):
+def fs_child_dependency_rm(fs_id):
     call([cmd, 'fs-dependants-rm', '--fs', fs_id])
 
 
@@ -370,10 +374,10 @@ def system_read_cache_pct_update_test(cap):
     if cap['SYS_READ_CACHE_PCT_UPDATE']:
         out = call([cmd, '-t' + sep, '--type', 'SYSTEMS'])[1]
         system_list = parse(out)
-        for system in system_list:
+        for specific_system in system_list:
             call([
                 cmd, '-t' + sep, 'system-read-cache-pct-update', '--system',
-                system[0], 50])[1]
+                specific_system[0], 50])
 
     return
 
@@ -578,13 +582,13 @@ def test_fs_creation(cap):
 
     if cap['FS_CHILD_DEPENDENCY']:
         fs_id = fs_create(pool_id)
-        fs_child_dependancy(fs_id)
+        fs_child_dependency(fs_id)
         delete_fs(fs_id)
 
     if cap['FS_CHILD_DEPENDENCY_RM']:
         fs_id = fs_create(pool_id)
         clone_fs(fs_id)
-        fs_child_dependancy_rm(fs_id)
+        fs_child_dependency_rm(fs_id)
         delete_fs(fs_id)
 
 
@@ -706,12 +710,12 @@ def search_test(system_id):
         'fs': [sys_id_filter, pool_id_filter, fs_id_filter],
         'exports': [fs_id_filter, nfs_export_id_filter],
     }
-    for resouce_type in list(supported.keys()):
+    for resource_type in list(supported.keys()):
         for cur_filter in all_filters:
-            if cur_filter in supported[resouce_type]:
-                call([cmd, 'list', '--type', resouce_type, cur_filter])
+            if cur_filter in supported[resource_type]:
+                call([cmd, 'list', '--type', resource_type, cur_filter])
             else:
-                call([cmd, 'list', '--type', resouce_type, cur_filter], 2)
+                call([cmd, 'list', '--type', resource_type, cur_filter], 2)
 
     un_export_fs(nfs_export_id)
     delete_fs(fs_id)
@@ -821,7 +825,7 @@ def volume_ident_led_on_test(cap):
         for volume in volume_list:
             call([
                 cmd, '-t' + sep, 'volume-ident-led-on', '--volume',
-                volume[0]])[1]
+                volume[0]])
 
     return
 
@@ -833,7 +837,7 @@ def volume_ident_led_off_test(cap):
         for volume in volume_list:
             call([
                 cmd, '-t' + sep, 'volume-ident-led-off', '--volume',
-                volume[0]])[1]
+                volume[0]])
 
     return
 
@@ -889,7 +893,7 @@ def test_volume_wcp_update():
             call([cmd, '-t' + sep, 'volume-write-cache-policy-update',
                  '--vol', vol_id, '--policy', policy])[1])
         if len(cache_info) != 1 or len(cache_info[0]) < 2:
-            print("Invalid return from volume-write-cache-policy-upate, "
+            print("Invalid return from volume-write-cache-policy-update, "
                   "should has 6 or more items")
             exit(10)
         if cache_info[0][1] != result:
@@ -917,17 +921,32 @@ def test_volume_rcp_update():
     volume_delete(vol_id)
 
 
+def verify_no_daemon_needed(cmd, expected_rcs):
+
+    env = copy.deepcopy(os.environ)
+    env['LSM_UDS_PATH'] = '/tmp/%s' + rs(12)
+
+    ec, out, err = call(cmd, env=env, expected_rcs=expected_rcs)
+
+    if ec == 4:
+        if 'DAEMON_NOT_RUNNING' in err.decode('utf8'):
+            print("Daemon does not need to run for local disk commands!")
+            exit(10)
+
+    return ec, out, err
+
+
 def test_local_disk_led():
     expected_rcs = [0, 4]
     flag_disk_found = False
 
-    if (os.geteuid() != 0):
+    if os.geteuid() != 0:
         print("Skipping test of 'local-disk-ident-led-on' and etc commands "
               "when not run by root user")
         return
 
     disk_paths = list(x[0] for x in
-                      parse(call([cmd, '-t' + sep, 'local-disk-list'])[1]))
+                      parse(verify_no_daemon_needed([cmd, '-t' + sep, 'local-disk-list'], [0])[1]))
 
     if len(disk_paths) == 0:
         print("Skipping test of 'local-disk-ident-led-on' and etc commands "
@@ -938,14 +957,14 @@ def test_local_disk_led():
     for disk_path in disk_paths[:4]:
         if os.path.exists(disk_path):
             flag_disk_found = True
-            call([cmd, 'local-disk-ident-led-on', '--path', disk_path],
-                 expected_rcs=expected_rcs)
-            call([cmd, 'local-disk-ident-led-off', '--path', disk_path],
-                 expected_rcs=expected_rcs)
-            call([cmd, 'local-disk-fault-led-on', '--path', disk_path],
-                 expected_rcs=expected_rcs)
-            call([cmd, 'local-disk-fault-led-off', '--path', disk_path],
-                 expected_rcs=expected_rcs)
+            verify_no_daemon_needed([cmd, 'local-disk-ident-led-on', '--path',
+                                     disk_path], expected_rcs=expected_rcs)
+            verify_no_daemon_needed([cmd, 'local-disk-ident-led-off', '--path',
+                                     disk_path], expected_rcs=expected_rcs)
+            verify_no_daemon_needed([cmd, 'local-disk-fault-led-on', '--path',
+                                     disk_path], expected_rcs=expected_rcs)
+            verify_no_daemon_needed([cmd, 'local-disk-fault-led-off', '--path',
+                                     disk_path], expected_rcs=expected_rcs)
 
     if flag_disk_found is False:
         print("Skipping test of 'local-disk-ident-led-on' and etc command "

@@ -1,0 +1,41 @@
+.TH "lsm_fs_ss_list" 3 "lsm_fs_ss_list" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_ss_list \- Gets a list of snapshots of specified file system
+.SH SYNOPSIS
+.B "int" lsm_fs_ss_list
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" fs ","
+.BI "lsm_fs_ss **" ss[] ","
+.BI "uint32_t *" ss_count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "fs" 12
+Pointer of lsm_fs to check for snapshots.
+.IP "ss[]" 12
+Output pointer of lsm_fs_ss array. It should be manually freed by
+\fBlsm_fs_ss_record_array_free\fP.
+.IP "ss_count" 12
+Number of elements in the array.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Gets a list of file systems snapshots on this connection.
+File system snapshot properties could be retrieved by these functions:
+    * \fBlsm_fs_ss_id_get\fP
+    * \fBlsm_fs_ss_name_get\fP
+    * \fBlsm_fs_ss_time_stamp_get\fP
+.SH "CAPABILITY"
+LSM_CAP_FS_SNAPSHOTS
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success or searched value not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags or invalid search
+        key.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

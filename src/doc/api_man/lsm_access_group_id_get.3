@@ -1,0 +1,19 @@
+.TH "lsm_access_group_id_get" 3 "lsm_access_group_id_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_access_group_id_get \- Retrieves the ID for the access group.
+.SH SYNOPSIS
+.B "const char  *" lsm_access_group_id_get
+.BI "(lsm_access_group *" group ");"
+.SH ARGUMENTS
+.IP "group" 12
+Access group to retrieve ID for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the ID for the access group.
+.SH "NOTE"
+Address returned is valid until lsm_access_group gets freed, copy
+return value if you need longer scope. Do not free returned string.
+.SH "RETURN"
+string. NULL if argument 'group' is NULL or not a valid lsm_access_group
+pointer.

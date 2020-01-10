@@ -1,0 +1,27 @@
+.TH "lsm_string_list_append" 3 "lsm_string_list_append" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_string_list_append \- Append specified string to lsm_string_list.
+.SH SYNOPSIS
+.B "int" lsm_string_list_append
+.BI "(lsm_string_list *" sl ","
+.BI "const char *" add ");"
+.SH ARGUMENTS
+.IP "sl" 12
+Pointer of lsm_string_list to update.
+.IP "add" 12
+The string to store in lsm_string_list.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Append the specified string to lsm_string_list.
+The string will be copied and managed by lsm_string_list.
+The lsm_string_list will be grown to hold this string.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_string_list
+        pointer.
+    * LSM_ERR_NO_MEMORY
+        When no enough memory.

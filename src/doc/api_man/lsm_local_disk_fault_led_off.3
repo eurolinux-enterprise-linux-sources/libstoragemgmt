@@ -1,0 +1,35 @@
+.TH "lsm_local_disk_fault_led_off" 3 "lsm_local_disk_fault_led_off" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_fault_led_off \- Turn off the disk fault LED.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_fault_led_off
+.BI "(const char *" disk_path ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_path" 12
+String. The path of disk path, example "/dev/sdb".
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be
+retrieved via \fBlsm_error_message_get\fP. Memory should
+be freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Turn off the fault LED for specified disk.
+Require read and write access to specified disk path.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_NO_MEMORY
+        When no memory.
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.
+    * LSM_ERR_NOT_FOUND_DISK
+        When provided disk path not found.
+    * LSM_ERR_PERMISSION_DENIED
+        Insufficient permission to access provided disk path.
+    * LSM_ERR_NO_SUPPORT
+        Action is not supported.

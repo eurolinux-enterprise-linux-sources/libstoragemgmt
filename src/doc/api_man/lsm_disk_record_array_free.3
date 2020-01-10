@@ -1,0 +1,22 @@
+.TH "lsm_disk_record_array_free" 3 "lsm_disk_record_array_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_record_array_free \- Free the memory of lsm_disk array.
+.SH SYNOPSIS
+.B "int" lsm_disk_record_array_free
+.BI "(lsm_disk *" disk[] ","
+.BI "uint32_t " size ");"
+.SH ARGUMENTS
+.IP "disk[]" 12
+Array to release memory for.
+.IP "size" 12
+Number of elements.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Frees the memory resources for an array of lsm_disk.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When not a valid lsm_disk pointer.

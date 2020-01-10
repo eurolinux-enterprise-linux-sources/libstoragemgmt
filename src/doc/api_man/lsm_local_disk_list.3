@@ -1,0 +1,32 @@
+.TH "lsm_local_disk_list" 3 "lsm_local_disk_list" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_list \- Query local disks.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_list
+.BI "(lsm_string_list **" disk_paths ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_paths" 12
+lsm_string_list pointer.
+The disk_path string format is '/dev/sd[a-z]+' for SCSI and ATA disks,
+'/dev/nvme[0-9]+n[0-9]+' for NVMe disks. Empty lsm_string_list but not
+NULL will be returned if no disk found. Memory should be freed by
+\fBlsm_string_list_free\fP.
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be retrieved via
+\fBlsm_error_message_get\fP. Memory should be freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Query local disk paths. Currently, only SCSI, SAS, ATA and NVMe disks
+will be included.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_NO_MEMORY
+        When no memory.
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.

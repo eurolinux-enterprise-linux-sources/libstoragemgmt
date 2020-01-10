@@ -1,0 +1,28 @@
+.TH "lsm_string_list_delete" 3 "lsm_string_list_delete" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_string_list_delete \- Deletes specified element from lsm_string_list.
+.SH SYNOPSIS
+.B "int" lsm_string_list_delete
+.BI "(lsm_string_list *" sl ","
+.BI "uint32_t " index ");"
+.SH ARGUMENTS
+.IP "sl" 12
+lsm_string_list. Pointer of lsm_string_list to update.
+.IP "index" 12
+uint32_t. The element index. Start from 0.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Deletes the specified element from lsm_string_list.
+The string of that element will be freed. The pointer
+retrieved by \fBlsm_string_list_elem_get\fP will be invalid.
+The element after this one will moved down, thus if you wanted to
+iterate over the list deleting each element one by one you need to
+do in reverse order.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_string_list
+        pointer.

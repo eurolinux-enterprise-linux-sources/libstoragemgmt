@@ -1,0 +1,15 @@
+.TH "lsm_block_range_source_start_get" 3 "lsm_block_range_source_start_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_block_range_source_start_get \- Retrieves start block of the source.
+.SH SYNOPSIS
+.B "uint64_t" lsm_block_range_source_start_get
+.BI "(lsm_block_range *" br ");"
+.SH ARGUMENTS
+.IP "br" 12
+Block range to retrieve source start block number.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the start block number of the replication source.
+.SH "RETURN"
+uint64_t. 0 if invalid lsm_block_range pointer.

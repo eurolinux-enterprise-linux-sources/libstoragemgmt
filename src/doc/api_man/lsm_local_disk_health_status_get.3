@@ -1,0 +1,37 @@
+.TH "lsm_local_disk_health_status_get" 3 "lsm_local_disk_health_status_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_health_status_get \- Query the health status of local disk.
+.SH SYNOPSIS
+.B "int" lsm_local_disk_health_status_get
+.BI "(const char *" disk_path ","
+.BI "int32_t *" health_status ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_path" 12
+String. The disk path, example "/dev/sdc".
+.IP "health_status" 12
+Output pointer of int32_t. Possible values are:
+* LSM_DISK_HEALTH_STATUS_UNKNOWN
+   Unsupported or failed to retrieved health status.
+* LSM_DISK_HEALTH_STATUS_FAIL
+* LSM_DISK_HEALTH_STATUS_WARN
+* LSM_DISK_HEALTH_STATUS_GOOD
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be retrieved via
+\fBlsm_error_message_get\fP. Memory should be freed by \fBlsm_error_free\fP.
+.SH "VERSION"
+1.5
+.SH "DESCRIPTION"
+Query the health status of the specified disk path.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_NO_MEMORY
+        When no memory.
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.
+    * LSM_ERR_NOT_FOUND_DISK
+        When provided disk path not found.

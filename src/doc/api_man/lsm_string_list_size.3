@@ -1,0 +1,22 @@
+.TH "lsm_string_list_size" 3 "lsm_string_list_size" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_string_list_size \- 
+.SH SYNOPSIS
+.B "uint32_t" lsm_string_list_size
+.BI "(lsm_string_list *" sl ");"
+.SH ARGUMENTS
+.IP "sl" 12
+lsm_string_list. The string list to retrieve from.
+.SH "DESCRIPTION"
+\fIparam\fP sl        Valid string list pointer
+\fIreturn\fP  size of list, note you cannot create a zero sized list, so
+    0 indicates error with structure
+
+lsm_string_list_size - Retrieve the size of lsm_string_list.
+
+Returns the size of the lsm_string_list.
+.SH "VERSION"
+1.0
+.SH "RETURN"
+uint32_t. 0 if argument 'sl' is NULL or not a valid
+lsm_string_list pointer.

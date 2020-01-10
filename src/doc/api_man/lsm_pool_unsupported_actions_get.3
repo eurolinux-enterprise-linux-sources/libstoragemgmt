@@ -1,0 +1,22 @@
+.TH "lsm_pool_unsupported_actions_get" 3 "lsm_pool_unsupported_actions_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_pool_unsupported_actions_get \- Retrieve what the pool cannot be used for.
+.SH SYNOPSIS
+.B "uint64_t" lsm_pool_unsupported_actions_get
+.BI "(lsm_pool *" p ");"
+.SH ARGUMENTS
+.IP "p" 12
+Pool to retrieve unsupported actions for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieve what actions is not supported by specified pool.
+.SH "RETURN"
+uint64_t. Unsupported actions which is a bit sensitive field.
+Possible values are:
+    * 0
+        If all actions are supported.
+    * LSM_POOL_UNSUPPORTED_VOLUME_GROW
+        Pool cannot grow volume on size.
+    * LSM_POOL_UNSUPPORTED_VOLUME_SHRINK
+        Pool cannot shrink volume on size.

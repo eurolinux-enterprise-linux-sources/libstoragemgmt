@@ -1,0 +1,40 @@
+.TH "lsm_volumes_accessible_by_access_group" 3 "lsm_volumes_accessible_by_access_group" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volumes_accessible_by_access_group \- Query volumes that the specified access group has access to.
+.SH SYNOPSIS
+.B "int" lsm_volumes_accessible_by_access_group
+.BI "(lsm_connect *" conn ","
+.BI "lsm_access_group *" group ","
+.BI "lsm_volume **" volumes[] ","
+.BI "uint32_t *" count ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "group" 12
+Pointer of lsm_access_group.
+.IP "volumes[]" 12
+Output pointer of lsm_volume array.
+Returned value must be freed with a call to
+\fBlsm_volume_record_array_free\fP.
+.IP "count" 12
+uint32_t. Number of volumes.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Return a list of volumes which is accessible by specified access group.
+.SH "CAPABILITY"
+LSM_CAP_VOLUMES_ACCESSIBLE_BY_ACCESS_GROUP
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid lsm_access_group pointer.
+    * LSM_ERR_NOT_FOUND_ACCESS_GROUP
+        When access group not found.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

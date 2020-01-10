@@ -1,0 +1,33 @@
+.TH "lsm_pool_element_type_get" 3 "lsm_pool_element_type_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_pool_element_type_get \- Retrieve what the pool can be used to create
+.SH SYNOPSIS
+.B "uint64_t" lsm_pool_element_type_get
+.BI "(lsm_pool *" p ");"
+.SH ARGUMENTS
+.IP "p" 12
+Pool to retrieve element type for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieve what type of element could the specified pool can be used to
+create.
+.SH "RETURN"
+uint64_t. Element type which is a bit sensitive filed, possible values
+are:
+    * 0
+        If unknown or unsupported.
+    * LSM_POOL_ELEMENT_TYPE_VOLUME
+        Pool create volume.
+    * LSM_POOL_ELEMENT_TYPE_FS
+        Pool create file system.
+    * LSM_POOL_ELEMENT_TYPE_POOL
+        Pool create sub-pool.
+    * LSM_POOL_ELEMENT_TYPE_DELTA
+        Pool could hold delta data for snapshots.
+    * LSM_POOL_ELEMENT_TYPE_VOLUME_FULL
+        Pool could create fully allocated volume.
+    * LSM_POOL_ELEMENT_TYPE_VOLUME_THIN
+        Pool could create thin provisioned volume.
+    * LSM_POOL_ELEMENT_TYPE_SYS_RESERVED
+        Pool reserved for system internal use.

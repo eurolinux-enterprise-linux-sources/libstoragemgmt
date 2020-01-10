@@ -1,0 +1,24 @@
+.TH "lsm_capability_supported" 3 "lsm_capability_supported" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_capability_supported \- Check whether specified capability is supported.
+.SH SYNOPSIS
+.B "int" lsm_capability_supported
+.BI "(lsm_storage_capabilities *" cap ","
+.BI "lsm_capability_type " t ");"
+.SH ARGUMENTS
+.IP "cap" 12
+Pointer of lsm_storage_capabilities to release.
+.IP "t" 12
+lsm_capability_type. Capability to query. Check the document of
+desired function for detail.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the support status of specified capability.
+.SH "RETURN"
+int. Possible values are:
+    * Non-zero
+        Capability is supported.
+    * 0
+        Capability is unsupported or invalid lsm_storage_capabilities
+        pointer or invalid lsm_capability_type.

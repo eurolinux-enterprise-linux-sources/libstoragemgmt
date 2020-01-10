@@ -1,0 +1,17 @@
+.TH "lsm_access_group_record_copy" 3 "lsm_access_group_record_copy" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_access_group_record_copy \- Duplicates a access group record.
+.SH SYNOPSIS
+.B "lsm_access_group  *" lsm_access_group_record_copy
+.BI "(lsm_access_group *" ag ");"
+.SH ARGUMENTS
+.IP "ag" 12
+Pointer of lsm_access_group to duplicate.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Duplicates a lsm_access_group record.
+.SH "RETURN"
+Pointer of lsm_access_group. NULL on memory allocation failure or
+invalid lsm_access_group pointer. Should be freed by
+\fBlsm_access_group_record_free\fP.

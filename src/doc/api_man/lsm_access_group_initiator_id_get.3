@@ -1,0 +1,20 @@
+.TH "lsm_access_group_initiator_id_get" 3 "lsm_access_group_initiator_id_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_access_group_initiator_id_get \- Retrieves the initiators of access group.
+.SH SYNOPSIS
+.B "lsm_string_list  *" lsm_access_group_initiator_id_get
+.BI "(lsm_access_group *" group ");"
+.SH ARGUMENTS
+.IP "group" 12
+Access group to retrieve initiators for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the initiators for the specified access group.
+.SH "NOTE"
+Address returned is valid until lsm_access_group gets freed, copy
+return value if you need longer scope. Do not free returned
+lsm_string_list.
+.SH "RETURN"
+lsm_string_list pointer. NULL if argument 'group' is NULL or not a valid
+lsm_access_group pointer.

@@ -1,0 +1,16 @@
+.TH "lsm_system_record_copy" 3 "lsm_system_record_copy" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_system_record_copy \- Duplicates a system record.
+.SH SYNOPSIS
+.B "lsm_system  *" lsm_system_record_copy
+.BI "(lsm_system *" s ");"
+.SH ARGUMENTS
+.IP "s" 12
+Pointer of lsm_system to duplicate.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Duplicates a lsm_system record.
+.SH "RETURN"
+Pointer of lsm_system. NULL on memory allocation failure. Should be
+freed by \fBlsm_system_record_free\fP.

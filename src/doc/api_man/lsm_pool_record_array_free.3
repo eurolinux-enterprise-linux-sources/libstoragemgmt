@@ -1,0 +1,22 @@
+.TH "lsm_pool_record_array_free" 3 "lsm_pool_record_array_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_pool_record_array_free \- Frees the memory of pool array.
+.SH SYNOPSIS
+.B "int" lsm_pool_record_array_free
+.BI "(lsm_pool *" pa[] ","
+.BI "uint32_t " size ");"
+.SH ARGUMENTS
+.IP "pa[]" 12
+Array to release memory for.
+.IP "size" 12
+Number of elements.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Frees the memory for each of the pools and then the pool array itself.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When not a valid lsm_pool pointer.

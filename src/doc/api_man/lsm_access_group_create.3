@@ -1,0 +1,54 @@
+.TH "lsm_access_group_create" 3 "lsm_access_group_create" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_access_group_create \- Create a new access group.
+.SH SYNOPSIS
+.B "int" lsm_access_group_create
+.BI "(lsm_connect *" conn ","
+.BI "const char *" name ","
+.BI "const char *" init_id ","
+.BI "lsm_access_group_init_type " init_type ","
+.BI "lsm_system *" system ","
+.BI "lsm_access_group **" access_group ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage system.
+.IP "init_id" 12
+String. Initiator id to be added to group.
+.IP "init_type" 12
+lsm_access_group_init_type. Valid initiator types are:
+* LSM_ACCESS_GROUP_INIT_TYPE_ISCSI_IQN
+   iSCSI IQN.
+* LSM_ACCESS_GROUP_INIT_TYPE_WWPN
+   FC WWPN
+.IP "system" 12
+Pointer of lsm_system to create access group for.
+.IP "access_group" 12
+Output pointer of newly created lsm_access_group.
+Returned value must be freed with function
+\fBlsm_access_group_record_free\fP.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Creates a new access group with one initiator in it. You may expand
+the access group by adding more initiators via
+\fBlsm_access_group_initiator_add\fP.
+.SH "CAPABILITY"
+LSM_CAP_ACCESS_GROUP_CREATE_WWPN
+LSM_CAP_ACCESS_GROUP_CREATE_ISCSI_IQN
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags or invalid system
+        pointer or invalid init_type or illegal initiator ID string.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.
+    * LSM_ERR_NOT_FOUND_SYSTEM
+        When the specified system does not exist.

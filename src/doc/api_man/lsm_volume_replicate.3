@@ -1,0 +1,83 @@
+.TH "lsm_volume_replicate" 3 "lsm_volume_replicate" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_replicate \- Replicates a volume
+.SH SYNOPSIS
+.B "int" lsm_volume_replicate
+.BI "(lsm_connect *" conn ","
+.BI "lsm_pool *" pool ","
+.BI "lsm_replication_type " rep_type ","
+.BI "lsm_volume *" volume_src ","
+.BI "const char *" name ","
+.BI "lsm_volume **" new_replicant ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "pool" 12
+Pointer of lsm_pool where the new replicate target volume stored in.
+If NULL, target volume will be reside in the same pool of source volume.
+.IP "rep_type" 12
+lsm_replication_type. Valid values are:
+* LSM_VOLUME_REPLICATE_CLONE
+   Point in time read writeable space efficient copy of
+   data. Also know as read writeable snapshot.
+* LSM_VOLUME_REPLICATE_COPY
+   Full bitwise copy of the data (occupies full space).
+* LSM_VOLUME_REPLICATE_MIRROR_ASYNC
+   I/O will be blocked until I/O reached source storage systems.
+   The source storage system will use copy the changes data to
+   target system in a predefined interval. There will be a small
+   data differences between source and target.
+* LSM_VOLUME_REPLICATE_MIRROR_SYNC
+   I/O will be blocked until I/O reached both source and
+   target storage systems. There will be no data difference
+   between source and target storage systems.
+.IP "volume_src" 12
+Pointer of replication source lsm_volume.
+.IP "name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage system.
+.IP "new_replicant" 12
+Output pointer of new replication target lsm_volume. Will be NULL if
+storage system support asynchronous action on this.
+Memory must be freed with a call to \fBlsm_volume_record_free\fP.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous action
+on this, a job will be created and could be tracked via
+\fBlsm_job_status_volume_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Replicates a volume.
+To delete the new target volume, please use \fBlsm_volume_delete\fP.
+If any volume is the replication source, it is only deletable when
+\fBlsm_volume_child_dependency\fP returns 0.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_REPLICATE
+LSM_CAP_VOLUME_REPLICATE_CLONE
+LSM_CAP_VOLUME_REPLICATE_COPY
+LSM_CAP_VOLUME_REPLICATE_MIRROR_ASYNC
+LSM_CAP_VOLUME_REPLICATE_MIRROR_SYNC
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid replication type.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_NOT_FOUND_POOL
+        When pool not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

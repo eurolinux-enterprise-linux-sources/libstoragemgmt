@@ -1,0 +1,19 @@
+.TH "lsm_pool_record_free" 3 "lsm_pool_record_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_pool_record_free \- Frees the memory for an individual pool
+.SH SYNOPSIS
+.B "int" lsm_pool_record_free
+.BI "(lsm_pool *" p ");"
+.SH ARGUMENTS
+.IP "p" 12
+lsm_pool to release memory for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Frees the memory for an individual lsm_pool
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When not a valid lsm_pool pointer.

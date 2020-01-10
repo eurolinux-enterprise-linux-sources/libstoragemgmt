@@ -1,0 +1,22 @@
+.TH "lsm_volume_admin_state_get" 3 "lsm_volume_admin_state_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_admin_state_get \- Retrieves administrative status of the volume.
+.SH SYNOPSIS
+.B "uint32_t" lsm_volume_admin_state_get
+.BI "(lsm_volume *" v ");"
+.SH ARGUMENTS
+.IP "v" 12
+Volume to retrieve administrative status for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves administrative status of the volume.
+.SH "RETURN"
+uint64_t. Status of the specified volume which is a bit sensitive field.
+Possible values are:
+    * LSM_VOLUME_ADMIN_STATE_ENABLED
+        The volume is not explicitly disabled by administrator. This is
+        the normal state of a volume.
+    * LSM_VOLUME_ADMIN_STATE_DISABLED
+        The volume is explicitly disabled by administrator or via method
+        \fBlsm_volume_disable\fP. All block access will be rejected.

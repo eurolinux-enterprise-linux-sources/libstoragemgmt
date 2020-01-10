@@ -1,0 +1,18 @@
+.TH "lsm_nfs_export_anon_uid_get" 3 "lsm_nfs_export_anon_uid_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_nfs_export_anon_uid_get \- Retrieves the user id mapped for anonymous id for the NFS export.
+.SH SYNOPSIS
+.B "uint64_t" lsm_nfs_export_anon_uid_get
+.BI "(lsm_nfs_export *" exp ");"
+.SH ARGUMENTS
+.IP "exp" 12
+NFS export to retrieve anonymous uid for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the user ID for anonymous ID of the lsm_nfs_export.
+.SH "RETURN"
+uint64_t. LSM_NFS_EXPORT_ANON_UID_GID_NA if this NFS export does not
+have setting for anonymous id.
+LSM_NFS_EXPORT_ANON_UID_GID_ERROR if exp is NULL or invalid
+lsm_nfs_export pointer.

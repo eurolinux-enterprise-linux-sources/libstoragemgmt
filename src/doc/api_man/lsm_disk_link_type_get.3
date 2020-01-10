@@ -1,0 +1,44 @@
+.TH "lsm_disk_link_type_get" 3 "lsm_disk_link_type_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_link_type_get \- Retrieves the link type for the disk.
+.SH SYNOPSIS
+.B "lsm_disk_link_type" lsm_disk_link_type_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve link type for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves the disk physical link type.
+.SH "CAPABILITY"
+LSM_CAP_DISK_LINK_TYPE
+.SH "RETURN"
+lsm_disk_link_type. Disk link type. Possible values:
+    * LSM_DISK_LINK_TYPE_NO_SUPPORT
+        Plugin does not support this property.
+    * LSM_DISK_LINK_TYPE_UNKNOWN
+        Given 'd' argument is NULL or plugin failed to detect link type.
+    * LSM_DISK_LINK_TYPE_FC
+        Fibre Channel
+    * LSM_DISK_LINK_TYPE_SSA
+        Serial Storage Architecture, Old IBM tech.
+    * LSM_DISK_LINK_TYPE_SBP
+        Serial Bus Protocol, used by IEEE 1394.
+    * LSM_DISK_LINK_TYPE_SRP
+        SCSI RDMA Protocol
+    * LSM_DISK_LINK_TYPE_ISCSI
+        Internet Small Computer System Interface
+    * LSM_DISK_LINK_TYPE_SAS
+        Serial Attached SCSI
+    * LSM_DISK_LINK_TYPE_ADT
+        Automation/Drive Interface Transport Protocol, often used by
+        Tape.
+    * LSM_DISK_LINK_TYPE_ATA
+        PATA/IDE or SATA.
+    * LSM_DISK_LINK_TYPE_USB
+        USB disk
+    * LSM_DISK_LINK_TYPE_SOP
+        SCSI over PCI-E
+    * LSM_DISK_LINK_TYPE_PCIE
+        PCI-E, e.g. NVMe

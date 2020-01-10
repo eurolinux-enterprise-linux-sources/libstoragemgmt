@@ -1,0 +1,16 @@
+.TH "lsm_battery_record_copy" 3 "lsm_battery_record_copy" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_battery_record_copy \- Duplicates a battery record.
+.SH SYNOPSIS
+.B "lsm_battery  *" lsm_battery_record_copy
+.BI "(lsm_battery *" b ");"
+.SH ARGUMENTS
+.IP "b" 12
+Pointer of lsm_battery to duplicate.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Duplicates a lsm_battery record.
+.SH "RETURN"
+Pointer of lsm_battery. NULL on memory allocation failure or invalid
+lsm_battery pointer. Should be freed by \fBlsm_battery_record_free\fP.

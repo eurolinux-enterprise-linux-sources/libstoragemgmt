@@ -1,0 +1,37 @@
+.TH "lsm_local_disk_link_speed_get" 3 "lsm_local_disk_link_speed_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_local_disk_link_speed_get \- 
+.SH SYNOPSIS
+.B "int" lsm_local_disk_link_speed_get
+.BI "(const char *" disk_path ","
+.BI "uint32_t *" link_speed ","
+.BI "lsm_error **" lsm_err ");"
+.SH ARGUMENTS
+.IP "disk_path" 12
+String. The path of block device, example: "/dev/sdb", "/dev/nvme0n1".
+.IP "link_speed" 12
+Output pointer of link speed in Mbps.
+.IP "lsm_err" 12
+Output pointer of lsm_error. Error message could be retrieved via
+\fBlsm_error_message_get\fP. Memory should be freed by \fBlsm_error_free\fP.
+.SH "DESCRIPTION"
+1.4
+
+Query the current negotiated disk link speed.
+Requires permission to open disk path(root user or disk group).
+The output speed is in Mbps. For example, 3.0 Gbps will get 3000.
+Set to 0(LSM_DISK_LINK_SPEED_UNKNOWN) if error.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL
+    * LSM_ERR_LIB_BUG
+        When something unexpected happens.
+    * LSM_ERR_NOT_FOUND_DISK
+        When provided disk path not found.
+    * LSM_ERR_PERMISSION_DENIED
+        Insufficient permission to access provided disk path.
+    * LSM_ERR_NO_SUPPORT
+        Action is not supported.

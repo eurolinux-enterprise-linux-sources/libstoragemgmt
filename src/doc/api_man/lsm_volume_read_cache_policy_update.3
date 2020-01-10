@@ -1,0 +1,42 @@
+.TH "lsm_volume_read_cache_policy_update" 3 "lsm_volume_read_cache_policy_update" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_read_cache_policy_update \- Change RAM read cache policy of the specified volume
+.SH SYNOPSIS
+.B "int" lsm_volume_read_cache_policy_update
+.BI "(lsm_connect *" conn ","
+.BI "lsm_volume *" volume ","
+.BI "uint32_t " rcp ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "volume" 12
+Pointer of lsm_string.
+.IP "rcp" 12
+uint32_t. Read cache policy. Valid values are:
+* LSM_VOLUME_READ_CACHE_POLICY_ENABLED
+   Enable read cache.
+* LSM_VOLUME_READ_CACHE_POLICY_DISABLED
+   Disable read cache.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Change the RAM read cache policy of the specified volume.  If
+LSM_CAP_VOLUME_READ_CACHE_POLICY_UPDATE_IMPACT_WRITE is supported(like
+HPE SmartArray), the changes on write cache policy might also impact
+read cache policy.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_READ_CACHE_POLICY_UPDATE
+LSM_CAP_VOLUME_READ_CACHE_POLICY_UPDATE_IMPACT_WRITE
+.SH "RETURN"
+LSM_ERR_OK on success else error reason
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or invalid flags.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

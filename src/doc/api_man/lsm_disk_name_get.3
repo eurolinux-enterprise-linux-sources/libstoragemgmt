@@ -1,0 +1,18 @@
+.TH "lsm_disk_name_get" 3 "lsm_disk_name_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_name_get \- Retrieves the name for the lsm_disk.
+.SH SYNOPSIS
+.B "const char  *" lsm_disk_name_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve name for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the name for the lsm_disk.
+.SH "NOTE"
+Address returned is valid until lsm_disk gets freed, copy return
+value if you need longer scope. Do not free returned string.
+.SH "RETURN"
+string. NULL if argument 'd' is NULL or not a valid lsm_disk pointer.

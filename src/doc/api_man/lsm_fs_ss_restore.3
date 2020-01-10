@@ -1,0 +1,58 @@
+.TH "lsm_fs_ss_restore" 3 "lsm_fs_ss_restore" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_fs_ss_restore \- Restores a file system snapshot.
+.SH SYNOPSIS
+.B "int" lsm_fs_ss_restore
+.BI "(lsm_connect *" conn ","
+.BI "lsm_fs *" fs ","
+.BI "lsm_fs_ss *" ss ","
+.BI "lsm_string_list *" files ","
+.BI "lsm_string_list *" restore_files ","
+.BI "int " all_files ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "fs" 12
+Pointer of lsm_fs which contains the snapshot
+.IP "ss" 12
+Pointer of lsm_fs_ss to restore to.
+.IP "files" 12
+Pointer of lsm_string_list. If defined, only restore specified files.
+If NULL and 'all_files' set to 1, restore all files.
+.IP "restore_files" 12
+Pointer of lsm_string_list. If defined, rename restored files to
+defined file paths and names.
+.IP "all_files" 12
+int. 0 for only restore defined files, 1 for restore for all files.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous action
+on this, a job will be created and could be tracked via
+\fBlsm_job_status_get\fP. NULL if storage system does not support
+asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Restores a file system or files to a previous state as specified in the
+snapshot.
+.SH "CAPABILITY"
+LSM_CAP_FS_SNAPSHOT_RESTORE
+LSM_CAP_FS_SNAPSHOT_RESTORE_SPECIFIC_FILES
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_FS
+        When file system not found.
+    * LSM_ERR_NOT_FOUND_FS_SS
+        When file system snapshot not found.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

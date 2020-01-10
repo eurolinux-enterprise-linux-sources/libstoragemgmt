@@ -1,0 +1,62 @@
+.TH "lsm_pool_status_get" 3 "lsm_pool_status_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_pool_status_get \- Retrieves status of specified pool.
+.SH SYNOPSIS
+.B "uint64_t" lsm_pool_status_get
+.BI "(lsm_pool *" s ");"
+.SH ARGUMENTS
+.IP "s" 12
+Pool to retrieve status for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves status of the specified pool.
+.SH "RETURN"
+uint64_t. Status of the specified pool which is a bit sensitive field.
+Possible values are:
+    * LSM_POOL_STATUS_UNKNOWN
+        Plugin failed to query out the status of Pool.
+    * LSM_POOL_STATUS_OK
+        The data of this pool is accessible with not data lose. But it
+        might along with LSM_POOL_STATUS_DEGRADED to indicate redundancy
+        lose.
+    * LSM_POOL_STATUS_OTHER
+        Vendor specific status. The status_info property will explain
+        the detail.
+    * LSM_POOL_STATUS_DEGRADED
+        Pool is lost data redundancy due to I/O error or offline of one
+        or more RAID member. Often come with LSM_POOL_STATUS_OK to
+        indicate data is still accessible with not data lose. Example:
+            * RAID 6 pool lost access to 1 disk or 2 disks.
+            * RAID 5 pool lost access to 1 disk.
+    * LSM_POOL_STATUS_ERROR
+        Pool data is not accessible due to some members offline.
+        Example:
+            * RAID 5 pool lost access to 2 disks.
+            * RAID 0 pool lost access to 1 disks.
+    * LSM_POOL_STATUS_STARTING
+        Pool is reviving from STOPPED status. Pool data is not
+        accessible yet.
+    * LSM_POOL_STATUS_STOPPING
+        Pool is stopping by administrator. Pool data is not accessible.
+    * LSM_POOL_STATUS_STOPPED
+        Pool is stopped by administrator. Pool data is not accessible.
+    * LSM_POOL_STATUS_RECONSTRUCTING
+        Pool is reconstructing the hash data or mirror data. Mostly
+        happen when disk revive from offline or disk replaced.
+        Pool.status_info may contain progress of this reconstruction
+        job. Often come with LSM_POOL_STATUS_DEGRADED and
+        LSM_POOL_STATUS_OK.
+    * LSM_POOL_STATUS_VERIFYING
+        Array is running integrity check on data of current pool. It
+        might be started by administrator or array itself. The I/O
+        performance will be impacted. Pool.status_info may contain
+        progress of this verification job. Often come with
+        LSM_POOL_STATUS_OK to indicate data is still accessible.
+    * LSM_POOL_STATUS_GROWING
+        Pool is growing its size and doing internal jobs.
+        Pool.status_info can contain progress of this growing job. Often
+        come with LSM_POOL_STATUS_OK to indicate data is still
+        accessible.
+    * LSM_POOL_STATUS_DELETING
+        Array is deleting current pool.

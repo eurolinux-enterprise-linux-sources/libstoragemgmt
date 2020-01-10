@@ -1,0 +1,44 @@
+.TH "lsm_job_status_pool_get" 3 "lsm_job_status_pool_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_job_status_pool_get \- Check on the status of a job with lsm_pool returned.
+.SH SYNOPSIS
+.B "int" lsm_job_status_pool_get
+.BI "(lsm_connect *" conn ","
+.BI "const char *" job_id ","
+.BI "lsm_job_status *" status ","
+.BI "uint8_t *" percent_complete ","
+.BI "lsm_pool **" pool ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection pointer
+.IP "job_id" 12
+String. Job to check status on.
+.IP "status" 12
+Output pointer of lsm_job_status. Possible values are:
+* LSM_JOB_COMPLETE
+   Job complete with no error.
+* LSM_JOB_ERROR
+   Job complete with error.
+* LSM_JOB_INPROGRESS
+   Job is still in progress.
+.IP "percent_complete" 12
+Output pointer of uint8_t. Percent job complete. Domain 0..100.
+.IP "pool" 12
+Output pointer of lsm_pool for completed operation.
+Returned value must be freed with a call to \fBlsm_pool_record_free\fP.
+.IP "flags" 12
+Reserved for future use, must be zero
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Check on the status of a job with lsm_pool returned.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags.
+    * LSM_ERR_NOT_FOUND_JOB
+        When job not found.

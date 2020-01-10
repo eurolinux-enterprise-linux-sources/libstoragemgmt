@@ -1,0 +1,38 @@
+.TH "lsm_volume_child_dependency" 3 "lsm_volume_child_dependency" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_child_dependency \- Check whether volume has child dependencies.
+.SH SYNOPSIS
+.B "int" lsm_volume_child_dependency
+.BI "(lsm_connect *" conn ","
+.BI "lsm_volume *" volume ","
+.BI "uint8_t *" yes ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid connection.
+.IP "volume" 12
+Pointer of lsm_volume.
+.IP "yes" 12
+uint8_t. 1 == Yes, 0 == No
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Returns 1 if the specified volume has child dependencies,
+else returns 0.
+Child dependencies means specified volume is acting as source volume
+of a replication.
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_CHILD_DEPENDENCY
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid volume.
+    * LSM_ERR_NOT_FOUND_VOLUME
+        When volume not found.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

@@ -1,0 +1,27 @@
+.TH "lsm_disk_rpm_get" 3 "lsm_disk_rpm_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_disk_rpm_get \- Retrieves the rotation speed for the disk.
+.SH SYNOPSIS
+.B "int32_t" lsm_disk_rpm_get
+.BI "(lsm_disk *" d ");"
+.SH ARGUMENTS
+.IP "d" 12
+Disk to retrieve rotation speed for.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Retrieves the disk rotation speed - revolutions per minute(RPM).
+.SH "CAPABILITY"
+LSM_CAP_DISK_RPM
+.SH "RETURN"
+int32_t. Disk rotation speed. Possible values:
+    * >1
+        Normal rotational disk.
+    * LSM_DISK_RPM_NO_SUPPORT
+        Not supported by plugin.
+    * LSM_DISK_RPM_NON_ROTATING_MEDIUM
+        Non-rotating medium (e.g., SSD).
+    * LSM_DISK_RPM_ROTATING_UNKNOWN_SPEED
+        Rotational disk with unknown speed.
+    * LSM_DISK_RPM_UNKNOWN
+        Bug or invalid argument or not supported.

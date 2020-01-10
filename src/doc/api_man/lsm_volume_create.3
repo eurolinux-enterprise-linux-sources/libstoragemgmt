@@ -1,0 +1,67 @@
+.TH "lsm_volume_create" 3 "lsm_volume_create" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_volume_create \- Creates a new volume
+.SH SYNOPSIS
+.B "int" lsm_volume_create
+.BI "(lsm_connect *" conn ","
+.BI "lsm_pool *" pool ","
+.BI "const char *" volume_name ","
+.BI "uint64_t " size ","
+.BI "lsm_volume_provision_type " provisioning ","
+.BI "lsm_volume **" new_volume ","
+.BI "char **" job ","
+.BI "lsm_flag " flags ");"
+.SH ARGUMENTS
+.IP "conn" 12
+Valid lsm_connect pointer.
+.IP "pool" 12
+Pointer of lsm_pool.
+.IP "volume_name" 12
+String. Human recognizable name, might be altered or ignored by certain
+storage systems.
+.IP "size" 12
+uint64_t. Size of new volume in bytes, actual size might be bigger than
+requested and will be based on array rounding to block size,
+.IP "provisioning" 12
+lsm_volume_provision_type. Type of volume provisioning to use. Valid
+values are:
+* LSM_VOLUME_PROVISION_DEFAULT
+   Let storage system to decided.
+* LSM_VOLUME_PROVISION_FULL
+   Create new fully allocated volume.
+* LSM_VOLUME_PROVISION_THIN
+   Create new thin provisioning volume.
+.IP "new_volume" 12
+Output pointer of lsm_volume. Will be NULL if storage system support
+asynchronous action on this.
+Memory must be freed with a call to \fBlsm_volume_record_free\fP.
+.IP "job" 12
+Output pointer of string. If storage system support asynchronous
+action on this, a job will be created and could be tracked via
+\fBlsm_job_status_volume_get\fP.
+NULL if storage system does not support asynchronous action on this.
+.IP "flags" 12
+Reserved for future use, must be LSM_CLIENT_FLAG_RSVD.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Creates a new volume(also known as LUN).
+.SH "CAPABILITY"
+LSM_CAP_VOLUME_CREATE
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number'.
+    * LSM_ERR_OK
+        On success.
+    * LSM_ERR_JOB_STARTED
+        A job is started. Please check the 'job' output pointer.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_connect pointer
+        or invalid flags or invalid provisioning type.
+    * LSM_ERR_NOT_FOUND_POOL
+        When pool not found.
+    * LSM_ERR_NOT_ENOUGH_SPACE
+        Pool does not have enough space.
+    * LSM_ERR_POOL_NOT_READY
+        Pool is not ready for volume creation.
+    * LSM_ERR_NO_SUPPORT
+        Not supported.

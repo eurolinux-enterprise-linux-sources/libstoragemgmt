@@ -3,7 +3,7 @@ dnl Copyright (C) 2011-2016 Red Hat, Inc.
 dnl See COPYING.LIB for the License of this software
 
 AC_INIT(
-    [libstoragemgmt], [1.4.0], [libstoragemgmt-devel@lists.fedorahosted.org],
+    [libstoragemgmt], [1.6.1], [libstoragemgmt-devel@lists.fedorahosted.org],
     [], [https://github.com/libstorage/libstoragemgmt/])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -95,6 +95,14 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([getpass memset socket strchr strdup strtol strtoul])
 
+dnl =====================================================================
+dnl Check for perl, used for C API documents.
+dnl =====================================================================
+AC_PATH_PROGS(PERL, perl)
+if test -z $PERL ;then
+    AC_MSG_ERROR([perl is required for build C API documents])
+fi
+
 dnl Availability of various common headers (non-fatal if missing).
 AC_CHECK_HEADERS([dlfcn.h])
 
@@ -137,14 +145,6 @@ AM_CONDITIONAL([WITH_TEST], [test "x$with_test" = "xyes"])
 
 if test "x${with_test}" = "xyes"; then
     PKG_CHECK_MODULES([LIBCHECK], [check >= 0.9.8 ])
-
-    dnl =====================================================================
-    dnl Check for perl, used for code constants checking
-    dnl =====================================================================
-    AC_PATH_PROGS(PERL, perl)
-    if test -z $PERL ;then
-        AC_MSG_ERROR([Need 'perl' to run test cases])
-    fi
 
     dnl =====================================================================
     dnl Check for chrpath, valgrind, wc, used for make check
@@ -193,16 +193,10 @@ AC_ARG_WITH([python3],
     [])
 
 if test "x$with_python3" = "xyes"; then
+    AC_SUBST(WITH_PYTHON3, yes)
     AC_PATH_PROGS(PYTHON, python3, [Python3 is required])
     AM_PATH_PYTHON([3], [], AC_MSG_ERROR([Python interpreter 3 required]))
-    AC_PYTHON_MODULE([lmiwbem], [], [python3])
-    AC_PYTHON_MODULE([pywbem], [], [python3])
-    if test "x$HAVE_PYMOD_LMIWBEM" == "xno" && \
-       test "x$HAVE_PYMOD_PYWBEM" == "xno" ;then
-        AC_MSG_ERROR([Neither python3 module 'lmiwbem' nor 'pywbem' found, \
-please install any of them.])
-    fi
-
+    AC_PYTHON_MODULE([pywbem], [Required], [python3])
     AC_PYTHON_MODULE([six], [Required], [python3])
     AC_PYTHON_MODULE([pyudev], [Required], [python3])
     PKG_CHECK_MODULES([PYTHON], [python3], [], [not_found_py_pkg=yes])
@@ -225,6 +219,7 @@ please install any of them.])
     fi
     AC_SUBST(PY_VERSION, 3)
 else
+    AC_SUBST(WITH_PYTHON3, no)
     AC_PATH_PROGS(PYTHON, python2.7 python2.6 python, [Python is required])
     AC_MSG_CHECKING([Check for Python major version])
     PYTHON_MAJOR_VERSION=`$PYTHON -c "import sys; print(sys.version_info[[0]])"`
@@ -239,13 +234,7 @@ but found $PYTHON_MAJOR_VERSION.x]) ;;
     AM_PATH_PYTHON([2.6], [],
                    AC_MSG_ERROR([Python interpreter 2.6 or 2.7 required]) )
 
-    AC_PYTHON_MODULE([lmiwbem])
-    AC_PYTHON_MODULE([pywbem])
-    if test "x$HAVE_PYMOD_LMIWBEM" == "xno" && \
-       test "x$HAVE_PYMOD_PYWBEM" == "xno" ;then
-        AC_MSG_ERROR([Neither python2 module 'lmiwbem' nor 'pywbem' found, \
-please install any of them.])
-    fi
+    AC_PYTHON_MODULE([pywbem], [Required])
     AC_PYTHON_MODULE([argparse], [Required])
     AC_PYTHON_MODULE([pyudev], [Required])
     AC_PYTHON_MODULE([six], [Required])
@@ -288,6 +277,30 @@ AC_ARG_WITH([hpsa],
     [with_hpsa=yes])
 
 AM_CONDITIONAL([WITH_HPSA], [test "x$with_hpsa" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-arcconf' to exclude Arcconf plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([arcconf],
+    [AS_HELP_STRING([--without-arcconf],
+        [Do not build the Microsemi Arcconf plugin])],
+    [],
+    [with_arcconf=yes])
+
+AM_CONDITIONAL([WITH_ARCCONF], [test "x$with_arcconf" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-local' to exclude local plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([local],
+    [AS_HELP_STRING([--without-local],
+        [Do not build the Local plugin])],
+    [],
+    [with_local=yes])
+
+AM_CONDITIONAL([WITH_LOCAL], [test "x$with_local" = "xyes"])
 
 dnl ==========================================================================
 dnl Check for libconfig as it is needed for lsmd daemon
@@ -342,9 +355,9 @@ if test "x$with_systemdsystemunitdir" != xno; then
 fi
 AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
 
-AX_CHECK_COMPILE_FLAG([-Wall], [CFLAGS="$CFLAGS -Wall"], [], [])
-AX_CHECK_COMPILE_FLAG([-Werror], [CFLAGS="$CFLAGS -Werror"], [], [])
-AX_CHECK_COMPILE_FLAG([-Wextra], [CFLAGS="$CFLAGS -Wextra"], [], [])
+CPPFLAGS="$CPPFLAGS -Wall"
+CPPFLAGS="$CPPFLAGS -Werror"
+CPPFLAGS="$CPPFLAGS -Wextra"
 
 AC_CONFIG_FILES([
     libstoragemgmt.pc
@@ -359,6 +372,9 @@ AC_CONFIG_FILES([
     plugin/simc/Makefile
     plugin/megaraid/Makefile
     plugin/hpsa/Makefile
+    plugin/arcconf/Makefile
+    plugin/nfs/Makefile
+    plugin/local/Makefile
     daemon/Makefile
     config/Makefile
     doc/Makefile
@@ -370,10 +386,13 @@ AC_CONFIG_FILES([
     doc/man/ontap_lsmplugin.1
     doc/man/targetd_lsmplugin.1
     doc/man/nstor_lsmplugin.1
-    doc/doxygen.conf
+    doc/man/nfs_lsmplugin.1
     doc/man/lsmd.conf.5
+    doc/man/arcconf_lsmplugin.1
     doc/man/megaraid_lsmplugin.1
     doc/man/hpsa_lsmplugin.1
+    doc/man/local_lsmplugin.1
+    doc/man/libstoragemgmt.h.3
     tools/Makefile
     tools/udev/Makefile
     tools/lsmcli/Makefile
@@ -395,6 +414,8 @@ AC_CONFIG_FILES([plugin/megaraid/megaraid_lsmplugin],
     [chmod +x plugin/megaraid/megaraid_lsmplugin])
 AC_CONFIG_FILES([plugin/hpsa/hpsa_lsmplugin],
     [chmod +x plugin/hpsa/hpsa_lsmplugin])
+AC_CONFIG_FILES([plugin/arcconf/arcconf_lsmplugin],
+    [chmod +x plugin/arcconf/arcconf_lsmplugin])
 AC_CONFIG_FILES([plugin/ontap/ontap_lsmplugin],
     [chmod +x plugin/ontap/ontap_lsmplugin])
 AC_CONFIG_FILES([plugin/nstor/nstor_lsmplugin],
@@ -403,6 +424,10 @@ AC_CONFIG_FILES([plugin/targetd/targetd_lsmplugin],
     [chmod +x plugin/targetd/targetd_lsmplugin])
 AC_CONFIG_FILES([plugin/smispy/smispy_lsmplugin],
     [chmod +x plugin/smispy/smispy_lsmplugin])
+AC_CONFIG_FILES([plugin/nfs/nfs_lsmplugin],
+    [chmod +x plugin/nfs/nfs_lsmplugin])
+AC_CONFIG_FILES([plugin/local/local_lsmplugin],
+    [chmod +x plugin/local/local_lsmplugin])
 AC_CONFIG_FILES([tools/lsmcli/lsmcli],
     [chmod +x tools/lsmcli/lsmcli])
 AC_CONFIG_FILES([test/plugin_test.py],

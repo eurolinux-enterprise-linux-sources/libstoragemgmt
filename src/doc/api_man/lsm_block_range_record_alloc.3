@@ -1,0 +1,23 @@
+.TH "lsm_block_range_record_alloc" 3 "lsm_block_range_record_alloc" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_block_range_record_alloc \- Allocates memory for a lsm_block_range record.
+.SH SYNOPSIS
+.B "lsm_block_range  *" lsm_block_range_record_alloc
+.BI "(uint64_t " source_start ","
+.BI "uint64_t " dest_start ","
+.BI "uint64_t " block_count ");"
+.SH ARGUMENTS
+.IP "source_start" 12
+The start block of replication source.
+.IP "dest_start" 12
+The start block of replication destination.
+.IP "block_count" 12
+The count of blocks for this block range.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Allocates memory for lsm_block_range opaque data type to store a block
+range.
+.SH "RETURN"
+Pointer of lsm_block_range. NULL on memory allocation failure or
+illegal argument. Should be freed by \fBlsm_block_range_record_free\fP.

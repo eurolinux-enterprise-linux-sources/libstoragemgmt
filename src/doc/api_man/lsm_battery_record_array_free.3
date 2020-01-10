@@ -1,0 +1,23 @@
+.TH "lsm_battery_record_array_free" 3 "lsm_battery_record_array_free" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_battery_record_array_free \- Frees the memory of battery array.
+.SH SYNOPSIS
+.B "int" lsm_battery_record_array_free
+.BI "(lsm_battery *" bs[] ","
+.BI "uint32_t " count ");"
+.SH ARGUMENTS
+.IP "bs[]" 12
+Array to release memory for.
+.IP "count" 12
+Number of elements.
+.SH "VERSION"
+1.3
+.SH "DESCRIPTION"
+Frees the memory for each of the batteries and then the battery array
+itself.
+.SH "RETURN"
+Error code as enumerated by 'lsm_error_number':
+    * LSM_ERR_OK
+        On success or not found.
+    * LSM_ERR_INVALID_ARGUMENT
+        When any argument is NULL or not a valid lsm_battery pointer.

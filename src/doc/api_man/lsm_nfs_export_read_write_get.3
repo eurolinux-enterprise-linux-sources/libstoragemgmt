@@ -1,0 +1,20 @@
+.TH "lsm_nfs_export_read_write_get" 3 "lsm_nfs_export_read_write_get" "October 2017" "Libstoragemgmt C API Manual" 
+.SH NAME
+lsm_nfs_export_read_write_get \- Retrieves the host list with read and write of the nfs_export
+.SH SYNOPSIS
+.B "lsm_string_list  *" lsm_nfs_export_read_write_get
+.BI "(lsm_nfs_export *" exp ");"
+.SH ARGUMENTS
+.IP "exp" 12
+NFS export to retrieve host list for.
+.SH "VERSION"
+1.0
+.SH "DESCRIPTION"
+Retrieves the host list with read and write for the lsm_nfs_export.
+.SH "NOTE"
+Address returned is valid until lsm_nfs_export gets freed, copy
+return value if you need longer scope. Do not free returned
+lsm_string_list.
+.SH "RETURN"
+lsm_string_list. NULL if argument 'exp' is NULL or not a valid
+lsm_nfs_export pointer.
