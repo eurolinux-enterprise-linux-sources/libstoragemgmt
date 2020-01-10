@@ -3,7 +3,7 @@ dnl Copyright (C) 2011-2016 Red Hat, Inc.
 dnl See COPYING.LIB for the License of this software
 
 AC_INIT(
-    [libstoragemgmt], [1.6.1], [libstoragemgmt-devel@lists.fedorahosted.org],
+    [libstoragemgmt], [1.6.2], [libstoragemgmt-devel@lists.fedorahosted.org],
     [], [https://github.com/libstorage/libstoragemgmt/])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -198,7 +198,6 @@ if test "x$with_python3" = "xyes"; then
     AM_PATH_PYTHON([3], [], AC_MSG_ERROR([Python interpreter 3 required]))
     AC_PYTHON_MODULE([pywbem], [Required], [python3])
     AC_PYTHON_MODULE([six], [Required], [python3])
-    AC_PYTHON_MODULE([pyudev], [Required], [python3])
     PKG_CHECK_MODULES([PYTHON], [python3], [], [not_found_py_pkg=yes])
 
     if test "x$not_found_py_pkg" == "xyes"; then
@@ -236,7 +235,6 @@ but found $PYTHON_MAJOR_VERSION.x]) ;;
 
     AC_PYTHON_MODULE([pywbem], [Required])
     AC_PYTHON_MODULE([argparse], [Required])
-    AC_PYTHON_MODULE([pyudev], [Required])
     AC_PYTHON_MODULE([six], [Required])
     PKG_CHECK_MODULES([PYTHON], [python2], [], [not_found_py_pkg=yes])
 
@@ -353,7 +351,16 @@ AC_ARG_WITH([systemdsystemunitdir],
 if test "x$with_systemdsystemunitdir" != xno; then
         AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
 fi
-AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
+
+#Setup the tmpfilesdir for systemd stuff
+AC_ARG_WITH([systemd-tmpfilesdir],
+        AS_HELP_STRING([--with-systemd-tmpfilesdir=DIR], [Directory for systemd temporary files]),
+        [], [with_systemdtmpfilesdir=$($PKG_CONFIG --variable=tmpfilesdir systemd)])
+if test "x$with_systemdtmpfilesdir" != xno; then
+        AC_SUBST([systemdtmpfilesdir], [$with_systemdtmpfilesdir])
+fi
+AM_CONDITIONAL(HAVE_SYSTEMD,
+               [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno -a -n "$with_systemdtmpfilesdir" -a "x$with_systemdtmpfilesdir" != xno ])
 
 CPPFLAGS="$CPPFLAGS -Wall"
 CPPFLAGS="$CPPFLAGS -Werror"
@@ -434,5 +441,7 @@ AC_CONFIG_FILES([test/plugin_test.py],
     [chmod +x test/plugin_test.py])
 AC_CONFIG_FILES([test/cmdtest.py],
     [chmod +x test/cmdtest.py])
+AC_CONFIG_FILES([tools/sanity_check/local_sanity_check.py],
+    [chmod +x tools/sanity_check/local_sanity_check.py])
 
 AC_OUTPUT

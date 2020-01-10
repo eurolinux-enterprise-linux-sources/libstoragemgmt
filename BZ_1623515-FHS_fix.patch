@@ -1,0 +1,10 @@
+diff -Nur libstoragemgmt-1.6.2_old/tools/Makefile.am libstoragemgmt-1.6.2/tools/Makefile.am
+--- libstoragemgmt-1.6.2_old/tools/Makefile.am	2018-05-18 16:10:52.000000000 +0800
++++ libstoragemgmt-1.6.2/tools/Makefile.am	2018-08-22 01:05:52.760911360 +0800
+@@ -4,5 +4,5 @@
+ 
+ EXTRA_DIST=use_cases/find_unused_lun.py
+ 
+-lsm_bindir=$(bindir)/lsm.d
++lsm_bindir=$(libexecdir)/lsm.d
+ lsm_bin_DATA=sanity_check/local_sanity_check.py use_cases/find_unused_lun.py

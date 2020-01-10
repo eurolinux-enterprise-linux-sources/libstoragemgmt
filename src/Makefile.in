@@ -105,7 +105,8 @@ CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = libstoragemgmt.pc python_binding/lsm/version.py \
 	plugin/sim/sim_lsmplugin plugin/ontap/ontap_lsmplugin \
 	plugin/nstor/nstor_lsmplugin plugin/targetd/targetd_lsmplugin \
-	plugin/smispy/smispy_lsmplugin
+	plugin/smispy/smispy_lsmplugin \
+	tools/sanity_check/local_sanity_check.py
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -382,9 +383,10 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/plugin/sim/sim_lsmplugin.in \
 	$(top_srcdir)/plugin/smispy/smispy_lsmplugin.in \
 	$(top_srcdir)/plugin/targetd/targetd_lsmplugin.in \
-	$(top_srcdir)/python_binding/lsm/version.py.in AUTHORS \
-	COPYING.LIB ChangeLog INSTALL NEWS README build-aux/compile \
-	build-aux/config.guess build-aux/config.sub \
+	$(top_srcdir)/python_binding/lsm/version.py.in \
+	$(top_srcdir)/tools/sanity_check/local_sanity_check.py.in \
+	AUTHORS COPYING.LIB ChangeLog INSTALL NEWS README \
+	build-aux/compile build-aux/config.guess build-aux/config.sub \
 	build-aux/install-sh build-aux/ltmain.sh build-aux/missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
@@ -591,13 +593,17 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 systemdsystemunitdir = @systemdsystemunitdir@
+systemdtmpfilesdir = @systemdtmpfilesdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
+# The default for systemdtmpfilesdir is intentionally not
+# prefix-sensitive, but we need to adjust it in order for distcheck to pass.
 AM_DISTCHECK_CONFIGURE_FLAGS = --with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir) \
-	--with-bash-completion-dir=$$dc_install_base/$(bashcompletiondir)
+	--with-bash-completion-dir=$$dc_install_base/$(bashcompletiondir) \
+	--with-systemd-tmpfilesdir=$${dc_install_base}/$(systemdtmpfilesdir)
 SUBDIRS = c_binding python_binding plugin doc tools daemon packaging config test
 EXTRA_DIST = \
 	libstoragemgmt.pc.in \
@@ -674,6 +680,8 @@ plugin/nstor/nstor_lsmplugin: $(top_builddir)/config.status $(top_srcdir)/plugin
 plugin/targetd/targetd_lsmplugin: $(top_builddir)/config.status $(top_srcdir)/plugin/targetd/targetd_lsmplugin.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 plugin/smispy/smispy_lsmplugin: $(top_builddir)/config.status $(top_srcdir)/plugin/smispy/smispy_lsmplugin.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+tools/sanity_check/local_sanity_check.py: $(top_builddir)/config.status $(top_srcdir)/tools/sanity_check/local_sanity_check.py.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -1306,6 +1314,9 @@ docs:
 
 rpm: clean
 	@(unset CDPATH ; $(MAKE) dist && rpmbuild -ta $(distdir).tar.gz)
+
+deb: clean
+	debuild -i -us -uc -b && ls $(top_srcdir)/../*.deb
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

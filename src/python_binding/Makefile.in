@@ -375,6 +375,7 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 systemdsystemunitdir = @systemdsystemunitdir@
+systemdtmpfilesdir = @systemdtmpfilesdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
@@ -395,7 +396,9 @@ lsm_PYTHON = \
 @WITH_PYTHON3_FALSE@_PY_CLIB_INIT_NAME = "init_clib"
 @WITH_PYTHON3_TRUE@_PY_CLIB_INIT_NAME = "PyInit__clib"
 pyexec_LTLIBRARIES = lsm/_clib.la
-lsm__clib_la_CFLAGS = $(PYTHON_CFLAGS) -I$(top_srcdir)/c_binding/include
+lsm__clib_la_CFLAGS = $(PYTHON_CFLAGS) -I$(top_srcdir)/c_binding/include \
+		      -Wno-cast-function-type
+
 lsm__clib_la_SOURCES = lsm/_clib.c
 lsm__clib_la_LDFLAGS = $(PYTHON_LIBS) \
 		       -module -avoid-version -export-symbols-regex \

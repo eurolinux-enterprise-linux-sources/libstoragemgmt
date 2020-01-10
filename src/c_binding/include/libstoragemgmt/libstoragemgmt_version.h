@@ -21,7 +21,7 @@
 
 #define LSM_MAJOR	1
 #define LSM_MINOR	6
-#define LSM_MICRO	1
+#define LSM_MICRO	2
 
 #define LSM_VERSION ((LSM_MAJOR * 10000) + (LSM_MINOR * 100) + LSM_MICRO)
 

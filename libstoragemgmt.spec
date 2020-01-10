@@ -3,14 +3,15 @@
 %endif
 
 Name:           libstoragemgmt
-Version:        1.6.1
-Release:        2%{?dist}
+Version:        1.6.2
+Release:        4%{?dist}
 Summary:        Storage array management library
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/libstorage/libstoragemgmt
 Source0:        https://github.com/libstorage/libstoragemgmt/releases/download/%{version}/%{name}-%{version}.tar.gz
-Patch1:         BZ_1524490_fix_megaraid_cache.patch
+Patch1:         BZ_1582458-Python-plugin-runner-don-t-print-socket-error-to-sys.patch
+Patch2:         BZ_1623515-FHS_fix.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:       %{name}-python
 BuildRequires:  autoconf automake libtool yajl-devel libxml2-devel check-devel perl
@@ -29,7 +30,6 @@ BuildRequires:  sqlite-devel
 %if 0%{?skip_mem_check} == 0
 BuildRequires:  valgrind
 %endif
-BuildRequires:  python-pyudev
 Requires: initscripts
 Requires(post): systemd
 Requires(preun): systemd
@@ -199,20 +199,25 @@ Group:          System Environment/Libraries
 Requires:       %{name}-python = %{version}-%{release}
 Requires(post): %{name}-python = %{version}-%{release}
 Requires(postun): %{name}-python = %{version}-%{release}
+Requires:       %{name}-arcconf-plugin = %{version}-%{release}
+Requires:       %{name}-nfs-plugin = %{version}-%{release}
+Requires:       %{name}-megaraid-plugin = %{version}-%{release}
+Requires:       %{name}-hpsa-plugin = %{version}-%{release}
 BuildArch:      noarch
 
 %description    local-plugin
-The nfs-plugin package contains plug-in for local NFS exports support.
 LibstorageMgmt local plugin allows user to manage locally storage system
 without caring which real plugin(s) should be used.
 
 %prep
-%setup -q
-%patch1 -p1 -b .megaraid-cache
+%autosetup -p1
 
 #Make sure you always have a build section, even when you don't
 #need it, see: https://bugzilla.redhat.com/show_bug.cgi?id=192422
 %build
+
+# We need to run this again as we changed Makefile.am in Patch2
+./autogen.sh
 
 #Tell the install program to preserve file date/timestamps
 %configure --disable-static \
@@ -230,11 +235,6 @@ find %{buildroot} -name '*.la' -exec rm -f {} ';'
 install -d -m 0755 %{buildroot}/%{_unitdir}
 install -m 0644 packaging/daemon/libstoragemgmt.service \
     %{buildroot}/%{_unitdir}/libstoragemgmt.service
-
-#tempfiles.d configuration for /var/run
-mkdir -p %{buildroot}/%{_tmpfilesdir}
-install -m 0644 packaging/daemon/lsm-tmpfiles.conf \
-    %{buildroot}/%{_tmpfilesdir}/%{name}.conf
 
 #Files for udev handling
 mkdir -p %{buildroot}/%{_udevrulesdir}
@@ -374,6 +374,20 @@ if [ $1 -eq 0 ]; then
     /usr/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 fi
 
+# Need to restart lsmd if plugin is new installed or removed.
+%post local-plugin
+if [ $1 -eq 1 ]; then
+    # New install.
+    /usr/bin/systemctl try-restart libstoragemgmt.service \
+        >/dev/null 2>&1 || :
+fi
+
+%postun local-plugin
+if [ $1 -eq 0 ]; then
+    # Remove
+    /usr/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+fi
+
 %files
 %defattr(-,root,root,-)
 %doc README COPYING.LIB
@@ -433,6 +447,9 @@ fi
 %{_bindir}/sim_lsmplugin
 %config(noreplace) %{_sysconfdir}/lsm/pluginconf.d/sim.conf
 %{_mandir}/man1/sim_lsmplugin.1*
+%dir %{_libexecdir}/lsm.d
+%{_libexecdir}/lsm.d/find_unused_lun.py*
+%{_libexecdir}/lsm.d/local_sanity_check.py*
 
 # Compiled C files for python library
 %files python-clibs
@@ -537,6 +554,18 @@ fi
 %{_mandir}/man1/local_lsmplugin.1*
 
 %changelog
+* Fri Aug 31 2018 Gris Ge <fge@redhat.com> - 1.6.2-4
+- Fix FHS problem of find_unused_lun.py and etc, (RHBZ #1623515)
+
+* Thu Jul 12 2018 Gris Ge <fge@redhat.com> 1.6.2-3
+- Fix rpm runtime dependency of libstoragemgmt-local-plugin.
+
+* Tue Jun 26 2018 Gris Ge <fge@redhat.com> 1.6.2-2
+- Silence socket EPIPE error. (RHBZ #1582458)
+
+* Tue May 15 2018 Gris Ge <fge@redhat.com> 1.6.2-1
+- Upgrade to 1.6.2
+
 * Tue Dec 12 2017 Gris Ge <fge@redhat.com> - 1.6.1-2
 - Fix MegaRAID cache query and set. (RHBZ #1524490)
 

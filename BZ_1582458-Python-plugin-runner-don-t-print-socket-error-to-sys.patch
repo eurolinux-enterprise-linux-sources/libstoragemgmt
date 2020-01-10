@@ -1,0 +1,42 @@
+From 4c87bf280d7d2a0bdb101d1d3d61cd1acfa71c5f Mon Sep 17 00:00:00 2001
+From: Gris Ge <fge@redhat.com>
+Date: Tue, 26 Jun 2018 01:10:33 +0800
+Subject: [PATCH] Python plugin runner: don't print socket error to syslog.
+
+Treat socket.error as client went away if plugin is registered.
+
+Fixing bug: https://bugzilla.redhat.com/show_bug.cgi?id=1582458
+
+Signed-off-by: Gris Ge <fge@redhat.com>
+---
+ python_binding/lsm/_pluginrunner.py | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/python_binding/lsm/_pluginrunner.py b/python_binding/lsm/_pluginrunner.py
+index 0b52e95a..f2642f2e 100644
+--- a/python_binding/lsm/_pluginrunner.py
++++ b/python_binding/lsm/_pluginrunner.py
+@@ -20,6 +20,7 @@
+ from lsm import LsmError, error, ErrorNumber
+ from lsm.lsmcli import cmd_line_wrapper
+ import six
++import errno
+ 
+ from lsm._common import SocketEOF as _SocketEOF
+ from lsm._transport import TransPort
+@@ -137,6 +138,12 @@ def run(self):
+             # occurring.
+             if need_shutdown:
+                 error('Client went away, exiting plug-in')
++        except socket.error as se:
++            if se.errno == errno.EPIPE:
++                error('Client went away, exiting plug-in')
++            else:
++                error("Unhandled exception in plug-in!\n" +
++                      traceback.format_exc())
+         except Exception:
+             error("Unhandled exception in plug-in!\n" + traceback.format_exc())
+ 
+-- 
+2.18.0
+
