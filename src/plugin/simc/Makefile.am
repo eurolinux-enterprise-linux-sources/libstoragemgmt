@@ -1,3 +1,5 @@
+if WITH_SIMC
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/c_binding/include \
 	-I@srcdir@/c_binding/include \
@@ -7,7 +9,8 @@ bin_PROGRAMS = simc_lsmplugin
 
 simc_lsmplugin_LDADD = \
 	../../c_binding/libstoragemgmt.la \
-	$(SQLITE3_LIBS) $(SSL_LIBS)
+	$(SQLITE3_LIBS) $(SSL_LIBS) -lrt
+# -lrt is only required for clock_gettime() on glibc before 2.17.
 
 simc_lsmplugin_SOURCES = \
 	utils.c utils.h \
@@ -20,3 +23,5 @@ simc_lsmplugin_SOURCES = \
 	ops_v1_3.h ops_v1_3.c \
 	vector.h vector.c \
 	simc_lsmplugin.c
+
+endif

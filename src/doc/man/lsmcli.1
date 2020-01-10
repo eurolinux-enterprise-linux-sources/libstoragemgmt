@@ -1,4 +1,4 @@
-.TH LSMCLI "1" "September 2014" "lsmcli 1.6.2" "libStorageMgmt"
+.TH LSMCLI "1" "December 2018" "lsmcli 1.7.3" "libStorageMgmt"
 .SH NAME
 lsmcli - libStorageMgmt command line interface
 
@@ -157,15 +157,16 @@ Required. Valid values are (case insensitive):
 
 .TP
 \fB--fs\fR \fI<FS_ID>\fR
-Required for \fB--type\fR=\fBSNAPSHOTS\fR, list the snapshots of certain
+Required for \fB--type\fR=\fBSNAPSHOTS\fR, list the snapshots of specific
 filesystem.
-Optional for type \fBEXPORTS\fR, list the NFS export for certain filesystem.
+Optional for type \fBEXPORTS\fR, list the NFS export for specific filesystem.
+Optional for type \fBFS\fR, list specific filesystem.
 .TP
 \fB--sys\fR \fI<SYS_ID>\fR
 Optional.
 Search resources from system with SYS_ID. Only supported when querying these
 types of resources: \fBVOLUMES\fR, \fBPOOLS\fR, \fBFS\fR,
-\fBSNAPSHOTS\fR, \fBDISKS\fR, \fBACCESS_GROUPS\fR, \fBTARGET_PORTS\r,
+\fBDISKS\fR, \fBACCESS_GROUPS\fR, \fBTARGET_PORTS\r,
 \fBBATTERIES\fR.
 .TP
 \fB--pool\fR \fI<POOL_ID>\fR
@@ -335,7 +336,7 @@ Required. Replication destination volume start block number. Must in pair with
 \fB--count\fR and \fB--src-start\fR.
 .TP
 \fB--count\fR \fI<BLK_COUNT>\fR
-Required. The count of replicated block startting from \fB--src-start\R block.
+Required. The count of replicated block startting from \fB--src-start\rR block.
 Must in pair with \fB--src-start\fR and \fB--dst-start\fR.
 
 .SS volume-replicate-range-block-size
@@ -364,7 +365,7 @@ Required. The ID of volume to query access.
 
 .SS volume-mask
 .TP 15
-Grant access group RW access to certain volume. Like LUN masking
+Grant access group RW access to specific volume. Like LUN masking
 or NFS export.
 .TP
 \fB--vol\fR \fI<VOL_ID>\fR
@@ -382,6 +383,20 @@ Required. The ID of volume to revoke.
 .TP
 \fB--ag\fR \fI<AG_ID>\fR
 Required. The ID of access group to revoke.
+
+.SS volume-enable
+.TP 15
+Enable block access of specified volume.
+.TP
+\fB--vol\fR \fI<VOL_ID>\fR
+Required. The ID of volume to enable access.
+
+.SS volume-disable
+.TP 15
+Disable block access of specified volume.
+.TP
+\fB--vol\fR \fI<VOL_ID>\fR
+Required. The ID of volume to disable access.
 
 .SS volume-raid-info
 .TP 15
@@ -507,7 +522,7 @@ supported yet.
 .TP
 \fB--root-host\fR \fI<ROOT_HOST>\fR
 Optional. Repeatable. The host/IP has root access. For two or more hosts/IPs:
-'\fB--root-host hostA --root-host hostB\fR'.
+\fB--root-host hostA --root-host hostB\fR.
 .TP
 \fB--ro-host\fR \fI<RO_HOST>\fR
 Optional. Repeatable. The host/IP has read only access. For two or more
@@ -515,7 +530,7 @@ hosts/IPs: '\fB--ro-host hostA --ro-host hostB\fR'.
 .TP
 \fB--rw-host\fR \fI<RW_HOST>\fR
 Optional. The host/IP has read/write access. For two or more hosts/IPs:
-'\fB--rw-host hostA --rw-host hostB\fR'.
+\fB--rw-host hostA --rw-host hostB\fR.
 
 .SS fs-unexport
 Remove an NFS export.
@@ -569,7 +584,7 @@ Required. The ID of snapshot to restore.
 \fB--file\fR \fI<FILE_PATH>\fR
 Optional. Repeatable. With this option defined, will only restore the defined
 file(s).
-'\fB--file fileA --file pathB\fR'.
+\fB--file fileA --file pathB\fR.
 .TP
 \fB--fileas\fR \fI<NEW_FILE_PATH>\fR
 Optional. Repeatable. With this option defined, the restored file will be
@@ -632,7 +647,7 @@ Query RAM cache information for the desired volume.
 Required. ID of the volume to query cache information.
 
 .SS volume-phy-disk-cache-update
-Disable or enable RAM physical disk cache of certain volume.
+Disable or enable RAM physical disk cache of specific volume.
 .TP 15
 \fB--vol\fR \fI<VOL_ID>\fR
 Required. ID of the volume to change.
@@ -641,7 +656,7 @@ Required. ID of the volume to change.
 Required. \fBEnable\fR or \fBDisable\fR.
 
 .SS volume-read-cache-policy-update
-Disable or enable RAM read cache of certain volume.
+Disable or enable RAM read cache of specific volume.
 .TP 15
 \fB--vol\fR \fI<VOL_ID>\fR
 Required. ID of the volume to change.
@@ -732,6 +747,10 @@ Alias of 'volume-resize'
 Alias of 'volume-mask'
 .SS vu
 Alias of 'volume-unmask'
+.SS ve
+Alias of 'volume-enable'
+.SS vi
+Alias of 'volume-disable'
 .SS vri
 Alias of 'volume-raid-info'
 .SS pmi
@@ -857,6 +876,12 @@ between the source and target.
 
 
 .SH NOTES
+.TP 8
+Optional search argument
+When specifying an optional search argument, it's not considered an error if
+no search results are found, eg. specifying a non-existent system id.  The exit
+code will be 0.
+
 .TP 8
 Plugin installation
 Plugins are installed individually except for the simulators which are always

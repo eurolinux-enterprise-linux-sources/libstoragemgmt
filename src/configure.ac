@@ -3,7 +3,7 @@ dnl Copyright (C) 2011-2016 Red Hat, Inc.
 dnl See COPYING.LIB for the License of this software
 
 AC_INIT(
-    [libstoragemgmt], [1.6.2], [libstoragemgmt-devel@lists.fedorahosted.org],
+    [libstoragemgmt], [1.7.3], [libstoragemgmt-devel@lists.fedorahosted.org],
     [], [https://github.com/libstorage/libstoragemgmt/])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -111,12 +111,6 @@ AC_CHECK_LIB([crypto], [MD5_Final], [SSL_LIBS=-lcrypto], AC_MSG_ERROR([Missing o
 AC_SUBST([SSL_LIBS])
 #Check for sqlite development libs for simc_lsmplugin
 PKG_CHECK_MODULES([SQLITE3], [sqlite3])
-
-#Check for json parser yajl
-AC_CHECK_HEADERS([yajl/yajl_gen.h yajl/yajl_parse.h], [] , AC_MSG_ERROR([Missing yajl development headers]) )
-AC_CHECK_HEADERS([yajl/yajl_version.h])
-AC_CHECK_LIB([yajl], [yajl_parse], [YAJL_LIBS=-lyajl], AC_MSG_ERROR([Missing yajl library]))
-AC_SUBST([YAJL_LIBS])
 
 dnl if --prefix is /usr, don't use /usr/var for localstatedir
 dnl or /usr/etc for sysconfdir
@@ -301,6 +295,90 @@ AC_ARG_WITH([local],
 AM_CONDITIONAL([WITH_LOCAL], [test "x$with_local" = "xyes"])
 
 dnl ==========================================================================
+dnl Add option '--without-ontap' to exclude ontap plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([ontap],
+    [AS_HELP_STRING([--without-ontap],
+        [Do not build the NetApp ontap plugin])],
+    [],
+    [with_ontap=yes])
+
+AM_CONDITIONAL([WITH_ONTAP], [test "x$with_ontap" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-nstor' to exclude nstor plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([nstor],
+    [AS_HELP_STRING([--without-nstor],
+        [Do not build the nstor plugin])],
+    [],
+    [with_nstor=yes])
+
+AM_CONDITIONAL([WITH_NSTOR], [test "x$with_nstor" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-smispy' to exclude SMI-S python plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([smispy],
+    [AS_HELP_STRING([--without-smispy],
+        [Do not build the SMI-S python plugin])],
+    [],
+    [with_smispy=yes])
+
+AM_CONDITIONAL([WITH_SMISPY], [test "x$with_smispy" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-targetd' to exclude targetd plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([targetd],
+    [AS_HELP_STRING([--without-targetd],
+        [Do not build the targetd plugin])],
+    [],
+    [with_targetd=yes])
+
+AM_CONDITIONAL([WITH_TARGETD], [test "x$with_targetd" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-simc' to exclude simulator C plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([simc],
+    [AS_HELP_STRING([--without-simc],
+        [Do not build the simulator C plugin])],
+    [],
+    [with_simc=yes])
+
+AM_CONDITIONAL([WITH_SIMC], [test "x$with_simc" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-sim' to exclude simulator python plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([sim],
+    [AS_HELP_STRING([--without-sim],
+        [Do not build the simulator python plugin])],
+    [],
+    [with_sim=yes])
+
+AM_CONDITIONAL([WITH_SIM], [test "x$with_sim" = "xyes"])
+
+dnl ==========================================================================
+dnl Add option '--without-nfs' to exclude nfs plugin.
+dnl ==========================================================================
+
+AC_ARG_WITH([nfs],
+    [AS_HELP_STRING([--without-nfs],
+        [Do not build the nfs plugin])],
+    [],
+    [with_nfs=yes])
+
+AM_CONDITIONAL([WITH_NFS], [test "x$with_nfs" = "xyes"])
+
+dnl ==========================================================================
 dnl Check for libconfig as it is needed for lsmd daemon
 dnl ==========================================================================
 PKG_CHECK_MODULES(
@@ -343,6 +421,31 @@ AC_ARG_WITH([bash-completion-dir],
 
 AC_SUBST([bashcompletiondir], [$with_bash_completion_dir])
 
+AC_ARG_WITH([yajl],
+    [AC_HELP_STRING([--with-yajl],
+                    [Use yajl instead of nlohmann/json for json processing, default: no])],
+    [with_yajl=yes], [])
+
+AM_CONDITIONAL([WITH_YAJL], [test "x$with_yajl" = "xyes"])
+
+if test "x${with_yajl}" = "xyes"; then
+    #Check for json parser yajl
+    AC_CHECK_HEADERS([yajl/yajl_gen.h yajl/yajl_parse.h], [] ,
+                     AC_MSG_ERROR([Missing yajl development headers]) )
+    AC_CHECK_HEADERS([yajl/yajl_version.h])
+    AC_CHECK_LIB([yajl], [yajl_parse], [YAJL_LIBS=-lyajl],
+                 AC_MSG_ERROR([Missing yajl library]))
+    AC_SUBST([YAJL_LIBS])
+    AC_DEFINE([LSM_USE_YAJL], [], [Use yajl library])
+else
+    dnl =====================================================================
+    dnl Check for gcc support of c++11, required for nlohmann/json library.
+    dnl =====================================================================
+    AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+
+fi
+
+
 #Setup the unit directory for systemd stuff
 PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([systemdsystemunitdir],
@@ -382,6 +485,11 @@ AC_CONFIG_FILES([
     plugin/arcconf/Makefile
     plugin/nfs/Makefile
     plugin/local/Makefile
+    plugin/ontap/Makefile
+    plugin/nstor/Makefile
+    plugin/smispy/Makefile
+    plugin/targetd/Makefile
+    plugin/sim/Makefile
     daemon/Makefile
     config/Makefile
     doc/Makefile
@@ -443,5 +551,7 @@ AC_CONFIG_FILES([test/cmdtest.py],
     [chmod +x test/cmdtest.py])
 AC_CONFIG_FILES([tools/sanity_check/local_sanity_check.py],
     [chmod +x tools/sanity_check/local_sanity_check.py])
+AC_CONFIG_FILES([tools/use_cases/find_unused_lun.py],
+    [chmod +x tools/use_cases/find_unused_lun.py])
 
 AC_OUTPUT

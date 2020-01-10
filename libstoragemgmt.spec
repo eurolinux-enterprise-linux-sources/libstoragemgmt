@@ -3,15 +3,13 @@
 %endif
 
 Name:           libstoragemgmt
-Version:        1.6.2
-Release:        4%{?dist}
+Version:        1.7.3
+Release:        3%{?dist}
 Summary:        Storage array management library
 Group:          System Environment/Libraries
 License:        LGPLv2+
 URL:            https://github.com/libstorage/libstoragemgmt
 Source0:        https://github.com/libstorage/libstoragemgmt/releases/download/%{version}/%{name}-%{version}.tar.gz
-Patch1:         BZ_1582458-Python-plugin-runner-don-t-print-socket-error-to-sys.patch
-Patch2:         BZ_1623515-FHS_fix.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:       %{name}-python
 BuildRequires:  autoconf automake libtool yajl-devel libxml2-devel check-devel perl
@@ -177,6 +175,7 @@ Summary:        Files for NFS local filesystem support for %{name}
 Group:          System Environment/Libraries
 Requires:       %{name}-python = %{version}-%{release}
 Requires:       %{name}-nfs-plugin-clibs = %{version}-%{release}
+Requires:       nfs-utils
 Requires(post): %{name}-python = %{version}-%{release}
 Requires(postun): %{name}-python = %{version}-%{release}
 BuildArch:      noarch
@@ -220,7 +219,7 @@ without caring which real plugin(s) should be used.
 ./autogen.sh
 
 #Tell the install program to preserve file date/timestamps
-%configure --disable-static \
+%configure --disable-static --with-yajl \
 %if 0%{?skip_mem_check} == 1
     --without-mem-leak-test
 %endif
@@ -406,8 +405,8 @@ fi
 
 %{_unitdir}/%{name}.service
 
-%ghost %dir %attr(0755, -, -) /run/lsm/
-%ghost %dir %attr(0755, -, -) /run/lsm/ipc
+%ghost %dir %attr(0775, root, libstoragemgmt) /run/lsm/
+%ghost %dir %attr(0775, root, libstoragemgmt) /run/lsm/ipc
 
 %attr(0644, root, root) %{_tmpfilesdir}/%{name}.conf
 
@@ -554,6 +553,19 @@ fi
 %{_mandir}/man1/local_lsmplugin.1*
 
 %changelog
+* Thu Mar 28 2019 Tony Asleson <tasleson@redhat.com> - 1.7.3-3
+* https://bugzilla.redhat.com/show_bug.cgi?id=1693678
+
+* Sat Feb 16 2019 Tony Asleson <tasleson@redhat.com> - 1.7.3-2
+* https://bugzilla.redhat.com/show_bug.cgi?id=1629735
+
+* Fri Feb 15 2019 Tony Asleson <tasleson@redhat.com> - 1.7.3-1
+- Add nfs-utils as a dependency
+- Upgrade to 1.7.3
+
+* Wed Dec 19 2018 Tony Asleson <tasleson@redhat.com> - 1.7.2-1
+- Upgrade to 1.7.2
+
 * Fri Aug 31 2018 Gris Ge <fge@redhat.com> - 1.6.2-4
 - Fix FHS problem of find_unused_lun.py and etc, (RHBZ #1623515)
 

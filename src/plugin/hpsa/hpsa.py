@@ -36,19 +36,21 @@ def _handle_errors(method):
         except KeyError as key_error:
             raise LsmError(
                 ErrorNumber.PLUGIN_BUG,
-                "Expected key missing from SmartArray hpssacli output:%s" %
-                key_error)
+                "Expected key missing from SmartArray ssacli output:%s, "
+                "please try to upgrade ssacli tool"
+                % key_error)
         except ExecError as exec_error:
             if 'No controllers detected' in exec_error.stdout:
                 raise LsmError(
                     ErrorNumber.NOT_FOUND_SYSTEM,
-                    "No HP SmartArray deteceted by hpssacli.")
+                    "No HP SmartArray deteceted by ssacli.")
             else:
                 raise LsmError(ErrorNumber.PLUGIN_BUG, str(exec_error))
         except Exception as common_error:
             raise LsmError(
                 ErrorNumber.PLUGIN_BUG,
-                "Got unexpected error %s" % common_error)
+                "Got unexpected error %s, please try to upgrade ssacli tool"
+                % common_error)
 
     return _wrapper
 
@@ -67,7 +69,7 @@ def _sysfs_file_read(path):
 
 def _sys_status_of(hp_ctrl_status):
     """
-    Base on data of "hpssacli ctrl all show status"
+    Base on data of "ssacli ctrl all show status"
     """
     status_info = ''
     status = System.STATUS_UNKNOWN
@@ -104,9 +106,53 @@ def _fix_mirror_group_lines(output_lines):
             mg_indent_level = None
 
 
-def _parse_hpssacli_output(output):
+def _sanitize_output(output_lines, return_warning=False):
     """
-    Got a output string of hpssacli to dictionary(nested).
+    Check for and process 'Warning: ' and 'Note:', strip empty lines
+    :param output_lines:
+    :return: array of strings or a tuple which is an array of strings and
+             the warning message if found.
+    """
+    warning_msg = None
+
+    num_lines = len(output_lines)
+    sanitized = []
+    i = 0
+    while i < num_lines:
+        if output_lines[i]:
+            # Newer versions report things like media errors
+            if output_lines[i].startswith('Warning:'):
+                start = i + 1
+                warning = output_lines[i]
+
+                # Append all lines until next empty
+                for z in range(start, num_lines):
+                    i += 1
+                    if output_lines[z]:
+                        warning += ' ' + output_lines[z]
+                    else:
+                        break
+
+                if warning_msg is None:
+                    warning_msg = warning[9:]
+
+            elif output_lines[i].startswith('Note:'):
+                # Discard
+                pass
+            else:
+                sanitized.append(output_lines[i])
+
+        i += 1
+
+    if return_warning:
+        return sanitized, warning_msg
+
+    return sanitized
+
+
+def _parse_ssacli_output(output):
+    """
+    Got a output string of ssacli to dictionary(nested).
     Workflow:
     0. Check out top and the second indention level's space count.
     1. Check current line and next line to determine whether current line is
@@ -119,10 +165,7 @@ def _parse_hpssacli_output(output):
                          'Controller Status', 'Cache Status',
                          'Battery/Capacitor Status', 'Unassigned', 'Array']
 
-    output_lines = [
-        l for l in output.split("\n")
-        if l and not l.startswith('Note:')]
-
+    output_lines = _sanitize_output(output.split("\n"))
     _fix_mirror_group_lines(output_lines)
 
     data = {}
@@ -180,7 +223,8 @@ def _parse_hpssacli_output(output):
             else:
                 raise LsmError(
                     ErrorNumber.PLUGIN_BUG,
-                    "_parse_hpssacli_output(): Found duplicate line %s" %
+                    "_parse_ssacli_output(): Found duplicate line %s, "
+                    "please try to upgrade ssacli tool" %
                     cur_line)
         else:
             if len(cur_line_split) == 1:
@@ -205,7 +249,8 @@ def _hp_size_to_lsm(hp_size):
 
     raise LsmError(
         ErrorNumber.PLUGIN_BUG,
-        "_hp_size_to_lsm(): Got unexpected HP size string %s" %
+        "_hp_size_to_lsm(): Got unexpected HP size string %s, "
+        "please try to upgrade ssacli tool" %
         hp_size)
 
 
@@ -282,7 +327,8 @@ _HP_VENDOR_RAID_LEVELS = ['1adm', '1+0adm']
 
 
 _LSM_RAID_TYPE_CONV = dict(
-    list(zip(list(_HP_RAID_LEVEL_CONV.values()), list(_HP_RAID_LEVEL_CONV.keys()))))
+    list(zip(list(_HP_RAID_LEVEL_CONV.values()),
+             list(_HP_RAID_LEVEL_CONV.keys()))))
 
 
 def _hp_raid_level_to_lsm(hp_ld):
@@ -331,8 +377,8 @@ def _sys_id_of_ctrl_data(ctrl_data):
 
 class SmartArray(IPlugin):
     _DEFAULT_BIN_PATHS = [
-        "/usr/sbin/hpssacli", "/opt/hp/hpssacli/bld/hpssacli",
-        "/usr/sbin/ssacli", "/opt/hp/hpssacli/bld/ssacli"]
+        "/usr/sbin/hpssacli", "/opt/hp/ssacli/bld/hpssacli",
+        "/usr/sbin/ssacli", "/opt/hp/ssacli/bld/ssacli"]
 
     def __init__(self):
         self._sacli_bin = None
@@ -355,7 +401,7 @@ class SmartArray(IPlugin):
                 ErrorNumber.INVALID_ARGUMENT,
                 "This plugin requires root privilege both daemon and client")
         uri_parsed = uri_parse(uri)
-        self._sacli_bin = uri_parsed.get('parameters', {}).get('hpssacli')
+        self._sacli_bin = uri_parsed.get('parameters', {}).get('ssacli')
         if not self._sacli_bin:
             self._sacli_bin = SmartArray.find_sacli()
             if not self._sacli_bin:
@@ -440,13 +486,13 @@ class SmartArray(IPlugin):
             if os_error.errno == errno.ENOENT:
                 raise LsmError(
                     ErrorNumber.INVALID_ARGUMENT,
-                    "hpssacli binary '%s' is not exist or executable." %
+                    "ssacli binary '%s' is not exist or executable." %
                     self._sacli_bin)
             else:
                 raise
 
         if flag_convert:
-            return _parse_hpssacli_output(output)
+            return _parse_ssacli_output(output)
         else:
             return output
 
@@ -454,8 +500,8 @@ class SmartArray(IPlugin):
     def systems(self, flags=0):
         """
         Depend on command:
-            hpssacli ctrl all show detail
-            hpssacli ctrl all show status
+            ssacli ctrl all show detail
+            ssacli ctrl all show status
         """
         rc_lsm_syss = []
         ctrl_all_show = self._sacli_exec(
@@ -512,7 +558,7 @@ class SmartArray(IPlugin):
                                      flags=Client.FLAG_RSVD):
         """
         Depends on command:
-            hpssacli ctrl slot=# modify cacheratio=read_pct/100-read_pct
+            ssacli ctrl slot=# modify cacheratio=read_pct/100-read_pct
         """
         if not system.plugin_data:
             raise LsmError(
@@ -566,7 +612,7 @@ class SmartArray(IPlugin):
               flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl all show config detail
+            ssacli ctrl all show config detail
         """
         lsm_pools = []
         ctrl_all_conf = self._sacli_exec(
@@ -626,7 +672,7 @@ class SmartArray(IPlugin):
                 flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl all show config detail
+            ssacli ctrl all show config detail
         """
         lsm_vols = []
         ctrl_all_conf = self._sacli_exec(
@@ -696,7 +742,7 @@ class SmartArray(IPlugin):
               flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl all show config detail
+            ssacli ctrl all show config detail
         """
         # TODO(Gris Ge): Need real test on spare disk.
         rc_lsm_disks = []
@@ -730,7 +776,7 @@ class SmartArray(IPlugin):
     def volume_raid_info(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=0 show config detail
+            ssacli ctrl slot=0 show config detail
         """
         if not volume.plugin_data:
             raise LsmError(
@@ -738,9 +784,9 @@ class SmartArray(IPlugin):
                 "Ilegal input volume argument: missing plugin_data property")
 
         (ctrl_num, array_num, ld_num) = volume.plugin_data.split(":")
-        ctrl_data = list(self._sacli_exec(
+        ctrl_data = next(iter(self._sacli_exec(
             ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-            ).values())[0]
+            ).values()))
 
         disk_count = 0
         strip_size = Volume.STRIP_SIZE_UNKNOWN
@@ -778,7 +824,7 @@ class SmartArray(IPlugin):
     def pool_member_info(self, pool, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=0 show config detail
+            ssacli ctrl slot=0 show config detail
         """
         if not pool.plugin_data:
             raise LsmError(
@@ -786,9 +832,9 @@ class SmartArray(IPlugin):
                 "Ilegal input volume argument: missing plugin_data property")
 
         (ctrl_num, array_num) = pool.plugin_data.split(":")
-        ctrl_data = list(self._sacli_exec(
+        ctrl_data = next(iter(self._sacli_exec(
             ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-            ).values())[0]
+            ).values()))
 
         disk_ids = []
         raid_type = Volume.RAID_TYPE_UNKNOWN
@@ -822,9 +868,9 @@ class SmartArray(IPlugin):
             8 * 1024, 16 * 1024, 32 * 1024, 64 * 1024,
             128 * 1024, 256 * 1024, 512 * 1024, 1024 * 1024]
 
-        ctrl_conf = list(self._sacli_exec([
+        ctrl_conf = next(iter(self._sacli_exec([
             "ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-            ).values())[0]
+            ).values()))
 
         if 'RAID 6 (ADG) Status' in ctrl_conf and \
            ctrl_conf['RAID 6 (ADG) Status'] == 'Enabled':
@@ -837,7 +883,7 @@ class SmartArray(IPlugin):
     def volume_raid_create_cap_get(self, system, flags=Client.FLAG_RSVD):
         """
         Depends on this command:
-            hpssacli ctrl slot=0 show config detail
+            ssacli ctrl slot=0 show config detail
         All hpsa support RAID 1, 10, 5, 50.
         If "RAID 6 (ADG) Status: Enabled", it will support RAID 6 and 60.
         For HP tribile mirror(RAID 1adm and RAID10adm), LSM does support
@@ -858,14 +904,14 @@ class SmartArray(IPlugin):
         """
         Depends on these commands:
             1. Create LD
-                hpssacli ctrl slot=0 create type=ld \
+                ssacli ctrl slot=0 create type=ld \
                     drives=1i:1:13,1i:1:14 size=max raid=1+0 ss=64
                 NOTE: This now optionally appends arguments \
                 if certain Client flags are set.
             2. Find out the system ID.
 
             3. Find out the pool fist disk belong.
-                hpssacli ctrl slot=0 pd 1i:1:13 show
+                ssacli ctrl slot=0 pd 1i:1:13 show
 
             4. List all volumes for this new pool.
                 self.volumes(search_key='pool_id', search_value=pool_id)
@@ -945,15 +991,16 @@ class SmartArray(IPlugin):
         sys_output = self._sacli_exec(
             ['ctrl', "slot=%s" % ctrl_num, 'show'])
 
-        sys_id = _sys_id_of_ctrl_data(list(sys_output.values())[0])
+        sys_id = _sys_id_of_ctrl_data(next(iter(sys_output.values())))
         # API code already checked empty 'disks', we will for sure get
         # valid 'ctrl_num' and 'hp_disk_ids'.
 
-        pd_output = self._sacli_exec(
-            ['ctrl', "slot=%s" % ctrl_num, 'pd', hp_disk_ids[0], 'show'])
+        pd_output = next(iter(self._sacli_exec(
+            ['ctrl', "slot=%s" % ctrl_num, 'pd', hp_disk_ids[0],
+             'show']).values()))
 
-        if list(list(pd_output.values())[0].keys())[0].lower().startswith("array "):
-            hp_array_id = list(list(pd_output.values())[0].keys())[0][len("array "):]
+        if next(iter(pd_output.keys())).lower().startswith("array "):
+            hp_array_id = next(iter(pd_output.keys()))[len("array "):]
             hp_array_id = "Array:%s" % hp_array_id
         else:
             raise LsmError(
@@ -976,8 +1023,8 @@ class SmartArray(IPlugin):
     def volume_delete(self, volume, flags=0):
         """
         Depends on command:
-            hpssacli ctrl slot=# ld # delete forced
-            hpssacli ctrl slot=# show config detail
+            ssacli ctrl slot=# ld # delete forced
+            ssacli ctrl slot=# show config detail
         """
         if not volume.plugin_data:
             raise LsmError(
@@ -991,9 +1038,9 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "ld %s" % ld_num, "delete"],
                 flag_convert=False, flag_force=True)
         except ExecError:
-            ctrl_data = self._sacli_exec(
+            ctrl_data = next(iter(self._sacli_exec(
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-                ).values()[0]
+                ).values()))
 
             for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
@@ -1012,8 +1059,8 @@ class SmartArray(IPlugin):
     def volume_enable(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=# ld # modify reenable forced
-            hpssacli ctrl slot=# show config detail
+            ssacli ctrl slot=# ld # modify reenable forced
+            ssacli ctrl slot=# show config detail
         """
         if not volume.plugin_data:
             raise LsmError(
@@ -1027,9 +1074,9 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "ld %s" % ld_num, "modify",
                  "reenable"], flag_convert=False, flag_force=True)
         except ExecError:
-            ctrl_data = self._sacli_exec(
+            ctrl_data = next(iter(self._sacli_exec(
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-                ).values()[0]
+                ).values()))
 
             for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
@@ -1049,8 +1096,8 @@ class SmartArray(IPlugin):
     def volume_ident_led_on(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=# ld # modify led=on
-            hpssacli ctrl slot=# show config detail
+            ssacli ctrl slot=# ld # modify led=on
+            ssacli ctrl slot=# show config detail
         """
         if not volume.plugin_data:
             raise LsmError(
@@ -1064,9 +1111,9 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "ld %s" % ld_num, "modify",
                  "led=on"], flag_convert=False)
         except ExecError:
-            ctrl_data = list(self._sacli_exec(
+            ctrl_data = next(iter(self._sacli_exec(
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-                ).values())[0]
+                ).values()))
 
             for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
@@ -1086,8 +1133,8 @@ class SmartArray(IPlugin):
     def volume_ident_led_off(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=# ld # modify led=off
-            hpssacli ctrl slot=# show config detail
+            ssacli ctrl slot=# ld # modify led=off
+            ssacli ctrl slot=# show config detail
         """
         if not volume.plugin_data:
             raise LsmError(
@@ -1101,9 +1148,9 @@ class SmartArray(IPlugin):
                 ["ctrl", "slot=%s" % ctrl_num, "ld %s" % ld_num, "modify",
                  "led=off"], flag_convert=False)
         except ExecError:
-            ctrl_data = list(self._sacli_exec(
+            ctrl_data = next(iter(self._sacli_exec(
                 ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-                ).values())[0]
+                ).values()))
 
             for key_name in list(ctrl_data.keys()):
                 if key_name != "Array: %s" % array_num:
@@ -1173,25 +1220,32 @@ class SmartArray(IPlugin):
     def volume_cache_info(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:
-            hpssacli ctrl slot=0 show config detail
+            ssacli ctrl slot=0 show config detail
         """
         flag_battery_ok = False
         flag_ram_ok = False
 
         (ctrl_num, array_num, ld_num) = self._cal_of_lsm_vol(volume)
-        ctrl_data = self._sacli_exec(
+        ctrl_data = next(iter(self._sacli_exec(
             ["ctrl", "slot=%s" % ctrl_num, "show", "config", "detail"]
-            ).values()[0]
+            ).values()))
 
         lsm_bats = self.batteries()
         for lsm_bat in lsm_bats:
             if lsm_bat.status == Battery.STATUS_OK:
                 flag_battery_ok = True
 
-        if 'Total Cache Size' in ctrl_data and \
-           _hp_size_to_lsm(ctrl_data['Total Cache Size']) > 0 and \
-           ctrl_data['Cache Status'] == 'OK':
-            flag_ram_ok = True
+        if 'Total Cache Size' in ctrl_data:
+            cache_size_str = ctrl_data['Total Cache Size']
+            # Since ssacli version 3.25, cache size is a number based in GiB.
+            try:
+                float(cache_size_str)
+                cache_size_str = cache_size_str + " GB"
+            except ValueError:
+                pass
+            if _hp_size_to_lsm(cache_size_str) > 0 and \
+               ctrl_data['Cache Status'] == 'OK':
+                flag_ram_ok = True
 
         ld_info = ctrl_data.get(
             "Array: %s" % array_num, {}).get("Logical Drive: %s" % ld_num, {})
@@ -1257,7 +1311,7 @@ class SmartArray(IPlugin):
     def volume_physical_disk_cache_update(self, volume, pdc,
                                           flags=Client.FLAG_RSVD):
         """
-        Depending on "hpssacli ctrl slot=3 modify dwc=<disable|enable>"
+        Depending on "ssacli ctrl slot=3 modify dwc=<disable|enable>"
         command.
         This will change all volumes' setting on physical disk cache.
         """
@@ -1280,9 +1334,9 @@ class SmartArray(IPlugin):
         """
         Depending on these commands:
             To disable both read and write cache:
-                hpssacli ctrl slot=3 ld 1 modify aa=disable
+                ssacli ctrl slot=3 ld 1 modify aa=disable
             To enable no battery write cache:
-                hpssacli ctrl slot=0 modify nbwc=enable
+                ssacli ctrl slot=0 modify nbwc=enable
         """
         (ctrl_num, array_num, ld_num) = self._cal_of_lsm_vol(volume)
 
@@ -1319,7 +1373,7 @@ class SmartArray(IPlugin):
         """
         Depending on this command:
             To disable both read and write cache:
-                hpssacli ctrl slot=3 ld 1 modify aa=disable
+                ssacli ctrl slot=3 ld 1 modify aa=disable
         """
         (ctrl_num, array_num, ld_num) = self._cal_of_lsm_vol(volume)
 
